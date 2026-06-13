@@ -3,6 +3,9 @@ library(tidyverse)
 library(survival)
 library(AdequacyModel)
 library(MASS)
+library(ggplot2)
+library(survminer)
+
 
 turnover <- read_excel("banco/turnover.xlsx")
 
@@ -38,39 +41,152 @@ attach(turnover)
 km <- survfit(Surv(stag,event)~1, conf.int = T)
 summary(km)
 
-#Plotando o gráfico de Sobrevivência KM
-plot(km, conf.int = F, xlab = "Tempo", ylab = "S(t)")
+#Sem censura
+curva_sobrevivencia <- ggsurvplot(km, 
+                                   data = turnover,
+                                   conf.int = FALSE,
+                                   xlab = "Meses",
+                                   ylab = "S(t)",
+                                   legend = "none",
+                                   censor = F, #Censura,
+                                   censor.shape = 124,   # barra vertical
+                                   censor.size = 3,
+                                   palette  = "black")
 
-#Plotando o gráfico de Sobrevivência com Censura
-plot(km, conf.int = F,mark.time = T, xlab = "Meses", ylab = "S(t)")
+ggsave("CurvaSobrevivencia.png", 
+       plot = curva_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
+
+#Com censura
+curva_sobrevivenciaCensura <- ggsurvplot(km, 
+                                  data = turnover,
+                                  conf.int = FALSE,
+                                  xlab = "Meses",
+                                  ylab = "S(t)",
+                                  legend = "none",
+                                  #censor = F, #Censura,
+                                  censor.shape = 124,   # barra vertical
+                                  censor.size = 3,
+                                  palette  = "black")
+
+ggsave("CurvaSobrevivenciaComCensura.png", 
+       plot = curva_sobrevivenciaCensura$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
+
 
 #Plotando o gráfico de função de risco acumulado
-plot(km, fun = "cumhaz", conf.int = F, xlab = "Meses", ylab = "H(t)" )
-abline(v=97, col="red")
+curva_RiscoAcumulado <- ggsurvplot(km,
+           data = turnover,
+           fun = "cumhaz",          # <--- função de risco acumulado
+           conf.int = F,
+           xlab = "Meses",
+           ylim = c(0, 4),
+           ylab = "H(t)",
+           legend = "none",
+           palette = "black",
+           censor = F)
+
+# curva_RiscoAcumulado$plot +
+#   geom_hline(yintercept = 4, linetype = "dashed", color = "red")
+
+
+ggsave("CurvaRiscoAcumulado.png", 
+       plot = curva_RiscoAcumulado$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
 #Classificaria como o início constante e próximo do 100 ela fica convexa 
 
+
+  
 #Plotando gráfico TTT
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/graficos_TTT/grafico_TTT.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
+
+#Plotando o gráfico de função de risco acumulado
 TTT(stag, col="red", lty = 2, grid = T)
 #O TTT aqui não é tão indicado pela quantidade de censuras, mas se formos avaliar, estaria mais para constante
+
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
 
 #-----------------------------------------------------------------------------------------------#----
 # 3)Fazer uma análise exploratória de cada covariável com a variável resposta: estimativa de 
 # Kaplan-Meier (KM) e teste de comparação das curvas.
 #-----------------------------------------------------------------------------------------------#----
 
-cores_grupos <- c("blue", "red", "black","orange", "green", "brown", "gray", "magenta", "yellow")
+cores_grupos <- c(
+  "#E5989B",  # rosa queimado,
+  "#264653",  # azul escuro
+  "#2A9D8F",  # verde petróleo
+  "#E9C46A",  # areia/dourado
+  "#F4A261",  # laranja terroso
+  "#E76F51",  # coral/terracota
+  "#457B9D",  # azul médio
+  "#A8DADC",  # azul claro
+  "#1D3557",  # azul marinho
+  "#B5838D",  # rosa acinzentado
+  "#6D6875",  # roxo acinzentado
+  "#FFB4A2",  # salmão claro
+
+  "#6C9EBF",  # azul suave
+  "#95B8D1",  # azul pastel
+  
+  "#003f5c",  # azul petróleo escuro
+  "#2c4875",  # azul médio
+  "#8a5082",  # roxo acinzentado
+  "#bc5090",  # rosa magenta
+  "#ff6361",  # coral
+  "#ff8531",  # laranja queimado
+  "#ffa600",  # dourado
+  "#7a5195",  # roxo profundo
+  "#ef5675",  # rosa vibrante
+  "#ff7c43",  # laranja terracota
+  "#665191",  # roxo médio
+  "#a05195",  # rosa acinzentado
+  "#d45087",  # rosa intenso
+  "#f95d6a",  # vermelho suave
+  "#ffbe7a"   # pêssego
+)
+
+caminho_curvaSobrevivencia <- "resultados/Curvas_Sobrevivencia"
 
 #Gender
 km_gender <- survfit(Surv(stag, event) ~ gender, conf.int=T)
 summary(km_gender)
-plot(km_gender, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
-     col = cores_grupos,
-)
-legend("topright",
-       legend = names(km_gender$strata),
-       col= cores_grupos, 
-       lty = 2
-)
+
+gender_sobrevivencia <- ggsurvplot(km_gender, 
+           data = turnover,
+           conf.int = FALSE,
+           xlab = "Meses",
+           ylab = "S(t)",
+           legend = "right",        # posição
+           legend.title = "Gender",
+           font.legend = 8,         # tamanho
+           legend.ncol = 2,
+           palette = cores_grupos, # colunas
+           # censor = F, #Censura,
+           censor.shape = 124,   # barra vertical
+           censor.size = 3
+           )  
+ggsave("CurvaSobrevivenciaGender.png", 
+       plot = gender_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
 
 #Teste de Comparação
 gender_logRank <- survdiff(Surv(stag, event) ~ gender, rho = 0)
@@ -86,14 +202,40 @@ gender_wilcoxon <- survdiff(Surv(stag, event) ~ gender, rho = 1 )
 
 km_industry <- survfit(Surv(stag, event) ~ industry, conf.int=T)
 summary(km_industry)
-plot(km_industry, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
-     col = cores_grupos,
-)
-legend("topright",
-       legend = names(km_industry$strata),
-       col= cores_grupos, 
-       lty = 2
-)
+
+ggsurvplot(km_industry, 
+           data = turnover,
+           conf.int = FALSE,
+           xlab = "Meses",
+           ylab = "S(t)",
+           legend = "right",        # posição
+           legend.title = "Grupos",
+           font.legend = 8,         # tamanho
+           legend.ncol = 2,
+           palette = cores_grupos)         # colunas
+
+
+industry_sobrevivencia <- ggsurvplot(km_industry, 
+                                   data = turnover,
+                                   conf.int = FALSE,
+                                   xlab = "Meses",
+                                   ylab = "S(t)",
+                                   legend = "right",        # posição
+                                   legend.title = "Industry",
+                                   font.legend = 8,         # tamanho
+                                   legend.ncol = 2,
+                                   palette = cores_grupos, # colunas
+                                   # censor = F, #Censura,
+                                   censor.shape = 124,   # barra vertical
+                                   censor.size = 3
+)  
+ggsave("CurvaSobrevivenciaIndustry.png", 
+       plot = industry_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
 
 #Teste de Comparação
 industry_logRank <- survdiff(Surv(stag, event) ~ industry, rho = 0)
@@ -105,14 +247,28 @@ industry_wilcoxon <- survdiff(Surv(stag, event) ~ industry, rho = 1 )
 #*** Profession (candidata) ***
 km_profession <- survfit(Surv(stag, event) ~ profession, conf.int=T)
 summary(km_profession)
-plot(km_profession, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
-     col = cores_grupos,
-)
-legend("topright",
-       legend = names(km_profession$strata),
-       col= cores_grupos, 
-       lty = 2
-)
+
+profession_sobrevivencia <- ggsurvplot(km_profession, 
+                                     data = turnover,
+                                     conf.int = FALSE,
+                                     xlab = "Meses",
+                                     ylab = "S(t)",
+                                     legend = "right",        # posição
+                                     legend.title = "Profession",
+                                     font.legend = 8,         # tamanho
+                                     legend.ncol = 2,
+                                     palette = cores_grupos, # colunas
+                                     # censor = F, #Censura,
+                                     censor.shape = 124,   # barra vertical
+                                     censor.size = 3
+)  
+ggsave("CurvaSobrevivenciaProfession.png", 
+       plot = profession_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
 
 #Teste de Comparação
 Profession_logRank <- survdiff(Surv(stag, event) ~ profession, rho = 0)
@@ -125,14 +281,29 @@ Profession_wilcoxon <- survdiff(Surv(stag, event) ~ profession, rho = 1 )
 #*** Traffic (candidata) ***
 km_traffic <- survfit(Surv(stag, event) ~ traffic, conf.int=T)
 summary(km_traffic)
-plot(km_traffic, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
-     col = cores_grupos,
-)
-legend("topright",
-       legend = names(km_traffic$strata),
-       col= cores_grupos, 
-       lty = 2
-)
+
+traffic_sobrevivencia <- ggsurvplot(km_traffic, 
+                                       data = turnover,
+                                       conf.int = FALSE,
+                                       xlab = "Meses",
+                                       ylab = "S(t)",
+                                       legend = "right",        # posição
+                                       legend.title = "Traffic",
+                                       font.legend = 8,         # tamanho
+                                       legend.ncol = 2,
+                                       palette = cores_grupos, # colunas
+                                       # censor = F, #Censura,
+                                       censor.shape = 124,   # barra vertical
+                                       censor.size = 3
+)  
+ggsave("CurvaSobrevivenciaTraffic.png", 
+       plot = traffic_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
+
 
 #Teste de Comparação
 Traffic_logRank <- survdiff(Surv(stag, event) ~ traffic, rho = 0)
@@ -144,14 +315,28 @@ Traffic_wilcoxon <- survdiff(Surv(stag, event) ~ traffic, rho = 1 )
 #Coach 
 km_coach <- survfit(Surv(stag, event) ~ coach, conf.int=T)
 summary(km_coach)
-plot(km_coach, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
-     col = cores_grupos,
-)
-legend("topright",
-       legend = names(km_coach$strata),
-       col= cores_grupos, 
-       lty = 2
-)
+
+coach_sobrevivencia <- ggsurvplot(km_coach, 
+                                    data = turnover,
+                                    conf.int = FALSE,
+                                    xlab = "Meses",
+                                    ylab = "S(t)",
+                                    legend = "right",        # posição
+                                    legend.title = "Coach",
+                                    font.legend = 8,         # tamanho
+                                    legend.ncol = 2,
+                                    palette = cores_grupos, # colunas
+                                    # censor = F, #Censura,
+                                    censor.shape = 124,   # barra vertical
+                                    censor.size = 3
+)  
+ggsave("CurvaSobrevivenciaCoach.png", 
+       plot = coach_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
 
 #Teste de Comparação
 coach_logRank <- survdiff(Surv(stag, event) ~ coach, rho = 0)
@@ -172,6 +357,28 @@ legend("topright",
        col= cores_grupos, 
        lty = 2
 )
+
+
+headGender_sobrevivencia <- ggsurvplot(km_HeadGender, 
+                                  data = turnover,
+                                  conf.int = FALSE,
+                                  xlab = "Meses",
+                                  ylab = "S(t)",
+                                  legend = "right",        # posição
+                                  legend.title = "Head Gender",
+                                  font.legend = 8,         # tamanho
+                                  legend.ncol = 2,
+                                  palette = cores_grupos, # colunas
+                                  # censor = F, #Censura,
+                                  censor.shape = 124,   # barra vertical
+                                  censor.size = 3
+)  
+ggsave("CurvaSobrevivenciaHeadGender.png", 
+       plot = headGender_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
 
 
 #Teste de Comparação
@@ -206,14 +413,27 @@ GreyWage_wilcoxon <- survdiff(Surv(stag, event) ~ greywage, rho = 1 )
 #*** Way (Candidata) ***
 km_Way <- survfit(Surv(stag, event) ~ way, conf.int=T)
 summary(km_Way)
-plot(km_Way, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
-     col = cores_grupos,
-)
-legend("topright",
-       legend = names(km_Way$strata),
-       col= cores_grupos, 
-       lty = 2
-)
+
+way_sobrevivencia <- ggsurvplot(km_Way, 
+                                data = turnover,
+                                conf.int = FALSE,
+                                xlab = "Meses",
+                                ylab = "S(t)",
+                                legend = "right",        # posição
+                                legend.title = "Way",
+                                font.legend = 8,         # tamanho
+                                legend.ncol = 2,
+                                palette = cores_grupos, # colunas
+                                # censor = F, #Censura,
+                                censor.shape = 124,   # barra vertical
+                                censor.size = 3
+)  
+ggsave("CurvaSobrevivenciaWay.png", 
+       plot = way_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
 
 
 #Teste de Comparação
