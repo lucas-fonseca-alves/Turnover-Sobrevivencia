@@ -4,7 +4,7 @@ library(survival)
 library(AdequacyModel)
 library(MASS)
 
-turnover <- read_excel("turnover.xlsx")
+turnover <- read_excel("banco/turnover.xlsx")
 
 #Transformando as variáveis
 turnover$stag <- as.numeric(turnover$stag)
@@ -529,9 +529,107 @@ stepAIC(modelo_lognormal, direction = "backward")
 #dist = "lognormal"
 
 stepAIC(modelo_intercepto_lognormal, 
+        direction = "forward",
+        scope = list(lower = formula(modelo_intercepto_lognormal), upper = modelo_lognormal))
+# survreg(formula = Surv(stag, event) ~ greywage + industry + traffic + 
+#           age + profession + selfcontrol + anxiety + coach, data = turnover_limpo, 
+#         dist = "lognormal")
+
+
+stepAIC(modelo_intercepto_lognormal, 
         scope = list(upper = modelo_lognormal, lower = modelo_intercepto_lognormal), 
         direction = "both")
 
 #survreg(formula = Surv(stag, event) ~ greywage + industry + traffic + 
 #          age + profession + selfcontrol + anxiety + coach, data = turnover_limpo, 
 #        dist = "lognormal")
+
+
+#OBS: TODOS os métodos chegaram a mesma seleção de variáveis
+
+modelo_lognormal_8va <- survreg(Surv(stag, event) ~ 
+                                  age +
+                                  industry +
+                                  profession +
+                                  traffic +
+                                  coach +
+                                  greywage +
+                                  selfcontrol +
+                                  anxiety, 
+                                data = turnover_limpo, dist = "lognormal")
+summary(modelo_lognormal_8va)
+
+
+
+#-----------------------------------------------------------------------------------------------#----
+# 13) Verifique a qualidade do ajuste do modelo final
+#-----------------------------------------------------------------------------------------------#----
+#cox snell
+
+tempo <- turnover_limpo$stag
+mi <- modelo_lognormal_8va$linear.predictors
+
+
+Smod <- pnorm((-log(tempo)+mi)/modelo_lognormal_8va$scale)
+ei <- (-log(Smod)) #resíduo de Cox Snell
+
+KMew <- survfit(Surv(ei, turnover_limpo$event)~1,conf.int = F)
+te <- KMew$time #Resíduo de Cox-Snell
+ste <- KMew$surv
+sexp <- exp(-te)
+
+plot(ste, sexp, xlab = "S(ei): Kaplan-Meier",
+     ylab = "S(ei): Exponencial Padrão")
+plot(KMew, conf.int = F, 
+     xlab = "Resíduos de Cox-Snell",
+     ylab = 'Sobrevivência Estimada')
+lines(te, sexp, lty=2, col=2)
+legend(
+  20,
+  1.0,
+  lty = c(1,2),
+  col = c(1,2),
+  c("Kaplan-Meier", "Exponencial Padrão"),
+  cex=0.8,
+  bty = "n"
+)
+
+
+
+#martingal 
+
+martingal <- turnover_limpo$event-ei
+
+par(mfrow=c(1,1))
+plot(tempo, martingal,
+     xlab = "log(tempo)",
+     ylab = "Residuo Martingal",  
+     pch = turnover_limpo$event+1
+     
+)
+
+plot(rank(tempo), martingal,
+     xlab = "Rank das Observações",
+     ylab = "Resíduos Martingal",
+     pch = turnover_limpo$event+1
+)
+
+#identify(rank(tempo), martingal)
+
+
+
+
+#deviance
+devw <- (martingal/abs(martingal))*(-2*(martingal+turnover_limpo$event*log(turnover_limpo$event-martingal)))^(1/2)
+plot(tempo, devw,
+     xlab = "log(tempo)",
+     ylab = "Resíduos Deviance",
+     pch = turnover_limpo$event)
+
+plot(rank(tempo), devw,
+     xlab = "ranks das observações",
+     ylab = "Resíduos Deviance",
+     pch = turnover_limpo$event+1)
+
+#identify(rank(tempo), devw)
+
