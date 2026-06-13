@@ -415,6 +415,10 @@ gamma_loglogistic <- modelo_intercepto_loglogistic$scale
 sobrev_loglogistic <- 1/(1+(tempo_km/alfa_loglogistic)^gamma_loglogistic)
 
 
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Ajuste_Distribuicoes/Distribuicoes_Implementadas.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(km, conf.int = FALSE, mark.time = FALSE,
      xlab = "Tempo", ylab = "Sobrevivência",
      main = "Comparação de distribuições")
@@ -427,6 +431,9 @@ legend("topright",
        col= c("blue", "red", "green", "orange"), 
        lwd = 2
 )
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
+
 
 #Pelo gráfico o lognormal é a que mais se adequa
 
@@ -578,8 +585,22 @@ te <- KMew$time #Resíduo de Cox-Snell
 ste <- KMew$surv
 sexp <- exp(-te)
 
-plot(ste, sexp, xlab = "S(ei): Kaplan-Meier",
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_lognormal_8va_KMxEP.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
+plot(ste, sexp, 
+     xlab = "S(ei): Kaplan-Meier",
      ylab = "S(ei): Exponencial Padrão")
+
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
+
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_lognormal_8va_CoxSnell.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
      ylab = 'Sobrevivência Estimada')
@@ -593,6 +614,8 @@ legend(
   cex=0.8,
   bty = "n"
 )
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
 
 
 
