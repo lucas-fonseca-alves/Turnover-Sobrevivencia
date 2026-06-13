@@ -1,0 +1,537 @@
+library(readxl)
+library(tidyverse)
+library(survival)
+library(AdequacyModel)
+library(MASS)
+
+turnover <- read_excel("turnover.xlsx")
+
+#Transformando as variáveis
+turnover$stag <- as.numeric(turnover$stag)
+turnover$event <- as.numeric(turnover$event)
+turnover$gender <- as.factor(turnover$gender)
+turnover$age <- as.numeric(turnover$age)
+turnover$industry <- as.factor(turnover$industry)
+turnover$profession <- as.factor(turnover$profession)
+turnover$traffic <- as.factor(turnover$traffic)
+turnover$coach <- as.factor(turnover$coach)
+turnover$head_gender <- as.factor(turnover$head_gender)
+turnover$greywage <- as.factor(turnover$greywage)
+turnover$way <- as.factor(turnover$way)
+turnover$extraversion <- as.numeric(turnover$extraversion)
+turnover$independ <- as.numeric(turnover$independ)
+turnover$selfcontrol <- as.numeric(turnover$selfcontrol)
+turnover$anxiety <- as.numeric(turnover$anxiety)
+turnover$novator <- as.numeric(turnover$novator)
+
+attach(turnover)
+
+#Stag = tempo, event = censura
+
+#-----------------------------------------------------------------------------------------------#----
+#2) Fazer uma análise exploratória apenas da variável resposta: estimativa de Kaplan-Meier (KM), 
+#gráfico da função de risco acumulado e gráfico do Tempo Total em Teste (gráfico TTT).
+#-----------------------------------------------------------------------------------------------#----
+
+#Estimando a função de sobrevivência por Kaplan-Meier
+
+km <- survfit(Surv(stag,event)~1, conf.int = T)
+summary(km)
+
+#Plotando o gráfico de Sobrevivência KM
+plot(km, conf.int = F, xlab = "Tempo", ylab = "S(t)")
+
+#Plotando o gráfico de Sobrevivência com Censura
+plot(km, conf.int = F,mark.time = T, xlab = "Meses", ylab = "S(t)")
+
+#Plotando o gráfico de função de risco acumulado
+plot(km, fun = "cumhaz", conf.int = F, xlab = "Meses", ylab = "H(t)" )
+abline(v=97, col="red")
+#Classificaria como o início constante e próximo do 100 ela fica convexa 
+
+#Plotando gráfico TTT
+TTT(stag, col="red", lty = 2, grid = T)
+#O TTT aqui não é tão indicado pela quantidade de censuras, mas se formos avaliar, estaria mais para constante
+
+#-----------------------------------------------------------------------------------------------#----
+# 3)Fazer uma análise exploratória de cada covariável com a variável resposta: estimativa de 
+# Kaplan-Meier (KM) e teste de comparação das curvas.
+#-----------------------------------------------------------------------------------------------#----
+
+cores_grupos <- c("blue", "red", "black","orange", "green", "brown", "gray", "magenta", "yellow")
+
+#Gender
+km_gender <- survfit(Surv(stag, event) ~ gender, conf.int=T)
+summary(km_gender)
+plot(km_gender, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
+     col = cores_grupos,
+)
+legend("topright",
+       legend = names(km_gender$strata),
+       col= cores_grupos, 
+       lty = 2
+)
+
+#Teste de Comparação
+gender_logRank <- survdiff(Surv(stag, event) ~ gender, rho = 0)
+#O log rank diz que não tem diferença entre os grupos
+
+gender_wilcoxon <- survdiff(Surv(stag, event) ~ gender, rho = 1 )
+#O wilcoxon diz que não tem diferença entre os grupos 
+
+#A 5% de significância não há diferença entre as curvas
+
+
+#*** Industry (Refazer gráfico, mas potencial variável) ***
+
+km_industry <- survfit(Surv(stag, event) ~ industry, conf.int=T)
+summary(km_industry)
+plot(km_industry, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
+     col = cores_grupos,
+)
+legend("topright",
+       legend = names(km_industry$strata),
+       col= cores_grupos, 
+       lty = 2
+)
+
+#Teste de Comparação
+industry_logRank <- survdiff(Surv(stag, event) ~ industry, rho = 0)
+#O log rank diz que tem diferença entre os grupos (mas tem muitos cruzamentos, então não é confiável)
+
+industry_wilcoxon <- survdiff(Surv(stag, event) ~ industry, rho = 1 )
+#O wilcoxon diz que tem diferença entre os grupos 
+
+#*** Profession (candidata) ***
+km_profession <- survfit(Surv(stag, event) ~ profession, conf.int=T)
+summary(km_profession)
+plot(km_profession, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
+     col = cores_grupos,
+)
+legend("topright",
+       legend = names(km_profession$strata),
+       col= cores_grupos, 
+       lty = 2
+)
+
+#Teste de Comparação
+Profession_logRank <- survdiff(Surv(stag, event) ~ profession, rho = 0)
+#O log rank diz que tem diferença entre os grupos (mas tem muitos cruzamentos, então não é confiável)
+
+Profession_wilcoxon <- survdiff(Surv(stag, event) ~ profession, rho = 1 )
+#O wilcoxon diz que tem diferença entre os grupos 
+
+
+#*** Traffic (candidata) ***
+km_traffic <- survfit(Surv(stag, event) ~ traffic, conf.int=T)
+summary(km_traffic)
+plot(km_traffic, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
+     col = cores_grupos,
+)
+legend("topright",
+       legend = names(km_traffic$strata),
+       col= cores_grupos, 
+       lty = 2
+)
+
+#Teste de Comparação
+Traffic_logRank <- survdiff(Surv(stag, event) ~ traffic, rho = 0)
+#O log rank diz que tem diferença entre os grupos (mas tem muitos cruzamentos, então não é confiável)
+
+Traffic_wilcoxon <- survdiff(Surv(stag, event) ~ traffic, rho = 1 )
+#O wilcoxon diz que tem diferença entre os grupos 
+
+#Coach 
+km_coach <- survfit(Surv(stag, event) ~ coach, conf.int=T)
+summary(km_coach)
+plot(km_coach, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
+     col = cores_grupos,
+)
+legend("topright",
+       legend = names(km_coach$strata),
+       col= cores_grupos, 
+       lty = 2
+)
+
+#Teste de Comparação
+coach_logRank <- survdiff(Surv(stag, event) ~ coach, rho = 0)
+#O log rank diz que não tem diferença entre os grupos (mas tem muitos cruzamentos, então não é confiável)
+
+coach_wilcoxon <- survdiff(Surv(stag, event) ~ coach, rho = 1 )
+#O wilcoxon diz que não tem diferença entre os grupos 
+
+
+#head gender
+km_HeadGender <- survfit(Surv(stag, event) ~ head_gender, conf.int=T)
+summary(km_HeadGender)
+plot(km_HeadGender, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
+     col = cores_grupos,
+)
+legend("topright",
+       legend = names(km_HeadGender$strata),
+       col= cores_grupos, 
+       lty = 2
+)
+
+
+#Teste de Comparação
+HeadGender_logRank <- survdiff(Surv(stag, event) ~ head_gender, rho = 0)
+#O log rank diz que não tem diferença entre os grupos (mas tem cruzamentos, então ficar atento!)
+
+HeadGender_wilcoxon <- survdiff(Surv(stag, event) ~ head_gender, rho = 1 )
+#O wilcoxon diz que não tem diferença entre os grupos 
+
+
+#*** GreyWage (Candidata) ***
+km_GreyWage <- survfit(Surv(stag, event) ~ greywage, conf.int=T)
+summary(km_GreyWage)
+plot(km_GreyWage, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
+     col = cores_grupos,
+)
+legend("topright",
+       legend = names(km_GreyWage$strata),
+       col= cores_grupos, 
+       lty = 2
+)
+
+
+#Teste de Comparação
+GreyWage_logRank <- survdiff(Surv(stag, event) ~ greywage, rho = 0)
+#O log rank diz que tem diferença entre os grupos
+
+GreyWage_wilcoxon <- survdiff(Surv(stag, event) ~ greywage, rho = 1 )
+#O wilcoxon diz que tem diferença entre os grupos 
+
+
+#*** Way (Candidata) ***
+km_Way <- survfit(Surv(stag, event) ~ way, conf.int=T)
+summary(km_Way)
+plot(km_Way, conf.int = F, xlab = "Meses", ylab = "S(t)", mark.time = T,
+     col = cores_grupos,
+)
+legend("topright",
+       legend = names(km_Way$strata),
+       col= cores_grupos, 
+       lty = 2
+)
+
+
+#Teste de Comparação
+Way_logRank <- survdiff(Surv(stag, event) ~ way, rho = 0)
+#O log rank diz que tem diferença entre os grupos (prefere-se utilizar o log rank por não cruzar)
+
+Way_wilcoxon <- survdiff(Surv(stag, event) ~ way, rho = 1 )
+#O wilcoxon diz que tem diferença entre os grupos 
+
+
+#-----------------------------------------------------------------------------------------------#----
+#4) Sugestão: construir gráficos do Tempo Total em Teste (gráfico TTT) para variáveis categóricas.
+#-----------------------------------------------------------------------------------------------#----
+
+pasta_destino_TTT <- "resultados/graficos_TTT"
+
+# Cria a pasta se ela não existir (recursivamente)
+if (!dir.exists(pasta_destino_TTT)) {
+  dir.create(pasta_destino_TTT, recursive = TRUE)
+}
+
+#Gender
+genero <- unique(gender)
+
+for (i in seq_along(genero)) {
+  # Define o caminho completo do arquivo
+  arquivo <- file.path(pasta_destino_TTT, paste0("grafico_TTT_gender_", genero[i], ".png"))
+  
+  png(filename = arquivo, width = 800, height = 600)  # opcional: definir dimensões
+  turnover %>% 
+    filter(gender == genero[i]) %>%
+    pull(stag) %>% 
+    TTT(col = "red", lwd = 2.5, grid = TRUE, lty = 2)
+  title(main = genero[i])
+  dev.off()
+}
+
+#Industry
+industria <- unique(industry)
+
+for (i in seq_along(industria)) {
+  # Define o caminho completo do arquivo
+  arquivo <- file.path(pasta_destino_TTT, paste0("grafico_TTT_industry_", industria[i], ".png"))
+  
+  png(filename = arquivo, width = 800, height = 600)  # opcional: definir dimensões
+  turnover %>% 
+    filter(industry == industria[i]) %>%
+    pull(stag) %>% 
+    TTT(col = "red", lwd = 2.5, grid = TRUE, lty = 2)
+  title(main = industria[i])
+  dev.off()
+}
+
+
+#profession
+profissao <- unique(profession)
+
+for (i in seq_along(profissao)) {
+  # Define o caminho completo do arquivo
+  arquivo <- file.path(pasta_destino_TTT, paste0("grafico_TTT_profession_", profissao[i], ".png"))
+  
+  png(filename = arquivo, width = 800, height = 600)  # opcional: definir dimensões
+  turnover %>% 
+    filter(profession == profissao[i]) %>%
+    pull(stag) %>% 
+    TTT(col = "red", lwd = 2.5, grid = TRUE, lty = 2)
+  title(main = profissao[i])
+  dev.off()
+}
+
+#traffic
+trafego<- unique(traffic)
+
+for (i in seq_along(trafego)) {
+  # Define o caminho completo do arquivo
+  arquivo <- file.path(pasta_destino_TTT, paste0("grafico_TTT_traffic_", trafego[i], ".png"))
+  
+  png(filename = arquivo, width = 800, height = 600)  # opcional: definir dimensões
+  turnover %>% 
+    filter(traffic == trafego[i]) %>%
+    pull(stag) %>% 
+    TTT(col = "red", lwd = 2.5, grid = TRUE, lty = 2)
+  title(main = trafego[i])
+  dev.off()
+}
+
+#coach
+treinador<- unique(coach)
+
+for (i in seq_along(treinador)) {
+  # Define o caminho completo do arquivo
+  arquivo <- file.path(pasta_destino_TTT, paste0("grafico_TTT_coach_", treinador[i], ".png"))
+  
+  png(filename = arquivo, width = 800, height = 600)  # opcional: definir dimensões
+  turnover %>% 
+    filter(coach == treinador[i]) %>%
+    pull(stag) %>% 
+    TTT(col = "red", lwd = 2.5, grid = TRUE, lty = 2)
+  title(main = treinador[i])
+  dev.off()
+}
+
+#HeadGender
+
+generoChefe<- unique(head_gender)
+
+for (i in seq_along(generoChefe)) {
+  # Define o caminho completo do arquivo
+  arquivo <- file.path(pasta_destino_TTT, paste0("grafico_TTT_coach_", generoChefe[i], ".png"))
+  
+  png(filename = arquivo, width = 800, height = 600)  # opcional: definir dimensões
+  turnover %>% 
+    filter(coach == generoChefe[i]) %>%
+    pull(stag) %>% 
+    TTT(col = "red", lwd = 2.5, grid = TRUE, lty = 2)
+  title(main = generoChefe[i])
+  dev.off()
+}
+
+#greywage
+
+salario_cinza<- unique(greywage)
+
+for (i in seq_along(salario_cinza)) {
+  # Define o caminho completo do arquivo
+  arquivo <- file.path(pasta_destino_TTT, paste0("grafico_TTT_greywage_", salario_cinza[i], ".png"))
+  
+  png(filename = arquivo, width = 800, height = 600)  # opcional: definir dimensões
+  turnover %>% 
+    filter(greywage == salario_cinza[i]) %>%
+    pull(stag) %>% 
+    TTT(col = "red", lwd = 2.5, grid = TRUE, lty = 2)
+  title(main = salario_cinza[i])
+  dev.off()
+}
+
+#Way
+
+transporte <- unique(way)
+
+for (i in seq_along(transporte)) {
+  # Define o caminho completo do arquivo
+  arquivo <- file.path(pasta_destino_TTT, paste0("grafico_TTT_way_", transporte[i], ".png"))
+  
+  png(filename = arquivo, width = 800, height = 600)  # opcional: definir dimensões
+  turnover %>% 
+    filter(way == transporte[i]) %>%
+    pull(stag) %>% 
+    TTT(col = "red", lwd = 2.5, grid = TRUE, lty = 2)
+  title(main = transporte[i])
+  dev.off()
+}
+
+
+#-----------------------------------------------------------------------------------------------#----
+#5) Com base nos resultados encontrados, discutir quais funções de densidade de probabilidade 
+#podem ter gerado a resposta do estudo?
+#-----------------------------------------------------------------------------------------------#----
+
+#-----------------------------------------------------------------------------------------------#----
+#6) Utilize um método gráfico para avaliar o ajuste das distribuições sugeridas no item (5). Se 
+#possível utilize teste de hipótese e medidas AIC, BIC, AICc.
+#-----------------------------------------------------------------------------------------------#----
+
+tempo_km <-  km$time
+turnover_limpo <- turnover %>% 
+  na.omit()
+
+
+modelo_intercepto_exp <- survreg(Surv(stag, event) ~ 1, data = turnover_limpo, dist = "exponential")
+summary(modelo_intercepto_exp)
+
+alfa_exp <- modelo_intercepto_exp$coefficients[1]
+sobrev_exp <- exp(-tempo_km/alfa_exp)
+
+
+modelo_intercepto_weibull <- survreg(Surv(stag, event) ~ 1, data = turnover_limpo, dist = "weibull")
+summary(modelo_intercepto_weibull)
+
+alfa_weibull <- modelo_intercepto_weibull$coefficients
+gamma_weibull <- 1/modelo_intercepto_weibull$scale
+
+sobrev_weibull <- exp(-(tempo_km/alfa_weibull)^gamma_weibull)
+
+
+modelo_intercepto_lognormal  <- survreg(Surv(stag, event) ~ 1, data = turnover_limpo, dist = "lognormal")
+
+media_log <- modelo_intercepto_lognormal$coefficients 
+desvioPadrao_log <- modelo_intercepto_lognormal$scale
+
+sobrev_lognormal <- (1-plnorm(tempo_km, media_log, desvioPadrao_log))
+
+
+modelo_intercepto_loglogistic  <- survreg(Surv(stag, event) ~ 1, data = turnover_limpo, dist = "loglogistic")
+
+alfa_loglogistic <- modelo_intercepto_loglogistic$coefficients
+gamma_loglogistic <- modelo_intercepto_loglogistic$scale
+
+sobrev_loglogistic <- 1/(1+(tempo_km/alfa_loglogistic)^gamma_loglogistic)
+
+
+plot(km, conf.int = FALSE, mark.time = FALSE,
+     xlab = "Tempo", ylab = "Sobrevivência",
+     main = "Comparação de distribuições")
+lines(tempo_km, sobrev_exp, col = "blue", lwd=2)
+lines(tempo_km, sobrev_weibull, col = "red", lwd=2)
+lines(tempo_km, sobrev_lognormal, col = "green", lwd=2)
+lines(tempo_km, sobrev_loglogistic, col = "orange", lwd=2)
+legend("topright",
+       legend = c("Exponencial", "Weibull", "Log-normal", "Log-logística"),
+       col= c("blue", "red", "green", "orange"), 
+       lwd = 2
+)
+
+#Pelo gráfico o lognormal é a que mais se adequa
+
+
+aic_val <- c(AIC(modelo_intercepto_exp), 
+             AIC(modelo_intercepto_weibull), 
+             AIC(modelo_intercepto_lognormal), 
+             AIC(modelo_intercepto_loglogistic))
+
+
+
+bic_val <- c(BIC(modelo_intercepto_exp), 
+             BIC(modelo_intercepto_weibull), 
+             BIC(modelo_intercepto_lognormal), 
+             BIC(modelo_intercepto_loglogistic))
+
+#Pelas medidas a loglogistica é a melhor
+
+
+#-----------------------------------------------------------------------------------------------#----
+#7) Utilize a densidade definida na etapa 6 e ajuste modelos de regressão com uma única covariável. 
+#-----------------------------------------------------------------------------------------------#----
+
+
+lognormal_gender  <- survreg(Surv(stag, event) ~ gender, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_gender)
+
+#*
+lognormal_age  <- survreg(Surv(stag, event) ~ age, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_age)
+
+lognormal_industry  <- survreg(Surv(stag, event) ~ industry, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_industry)
+
+lognormal_profession  <- survreg(Surv(stag, event) ~ profession, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_profession)
+
+lognormal_traffic  <- survreg(Surv(stag, event) ~ traffic, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_traffic)
+
+lognormal_coach  <- survreg(Surv(stag, event) ~ coach, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_coach)
+
+lognormal_headGender  <- survreg(Surv(stag, event) ~ head_gender, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_headGender)
+
+lognormal_greywage  <- survreg(Surv(stag, event) ~ greywage, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_greywage)
+
+lognormal_way <- survreg(Surv(stag, event) ~ way, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_way)
+
+lognormal_extraversion <- survreg(Surv(stag, event) ~ extraversion, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_extraversion)
+
+lognormal_independ <- survreg(Surv(stag, event) ~ independ, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_independ)
+
+lognormal_selfcontrol <- survreg(Surv(stag, event) ~ selfcontrol, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_selfcontrol)
+
+lognormal_anxiety <- survreg(Surv(stag, event) ~ anxiety, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_anxiety)
+
+lognormal_novator <- survreg(Surv(stag, event) ~ novator, data = turnover_limpo, dist = "lognormal")
+summary(lognormal_novator)
+
+
+
+#-----------------------------------------------------------------------------------------------#----
+#8) Construir um modelo completo de regressão com todas as covariáveis que foram significativas ao 
+#nível de 10% na etapa 7
+#-----------------------------------------------------------------------------------------------#----
+
+modelo_lognormal <- survreg(Surv(stag, event) ~ gender +
+                            age +
+                            industry +
+                            profession +
+                            traffic +
+                            coach +
+                            head_gender +
+                            greywage +
+                            way +
+                            extraversion +
+                            independ +
+                            selfcontrol +
+                            anxiety +
+                            novator, 
+                            data = turnover_limpo, dist = "lognormal")
+summary(modelo_lognormal)
+
+#-----------------------------------------------------------------------------------------------#----
+# 9) Excluir covariáveis não significativas (a nível de 10%) na etapa 8 uma de cada vez. Se essa etapa 
+# não se aplica a esses dados, passe para a etapa10
+#-----------------------------------------------------------------------------------------------#----
+
+stepAIC(modelo_lognormal, direction = "backward")
+
+#Surv(stag, event) ~ age + industry + profession + traffic + coach + greywage + selfcontrol + anxiety, data = turnover_limpo, 
+#dist = "lognormal"
+
+stepAIC(modelo_intercepto_lognormal, 
+        scope = list(upper = modelo_lognormal, lower = modelo_intercepto_lognormal), 
+        direction = "both")
+
+#survreg(formula = Surv(stag, event) ~ greywage + industry + traffic + 
+#          age + profession + selfcontrol + anxiety + coach, data = turnover_limpo, 
+#        dist = "lognormal")
