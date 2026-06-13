@@ -1,0 +1,1 @@
+Insiram nesta pasta o(s) banco(s) de dados que serão de fato utilizados nas análises dos alocados.
