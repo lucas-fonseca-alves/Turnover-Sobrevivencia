@@ -161,7 +161,7 @@ cores_grupos <- c(
   "#ffbe7a"   # pêssego
 )
 
-caminho_curvaSobrevivencia <- "resultados/Curvas_Sobrevivencia"
+caminho_curvaSobrevivencia <- "resultados/Exploratoria"
 
 #Gender
 km_gender <- survfit(Surv(stag, event) ~ gender, conf.int=T)
@@ -442,6 +442,114 @@ Way_logRank <- survdiff(Surv(stag, event) ~ way, rho = 0)
 
 Way_wilcoxon <- survdiff(Surv(stag, event) ~ way, rho = 1 )
 #O wilcoxon diz que tem diferença entre os grupos 
+
+
+#Extraversion
+
+extraversion_boxplot <- ggplot(turnover) +
+  aes(
+    x = as.factor(event),
+    y = extraversion
+  ) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Censura", y = "Extraversion")+
+  theme_classic()
+
+ggsave("BoxplotExtraversion.png", 
+       plot = extraversion_boxplot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
+
+#Independ
+independ_boxplot <- ggplot(turnover) +
+  aes(
+    x = as.factor(event),
+    y = independ
+  ) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Censura", y = "Independ")+
+  theme_classic()
+
+ggsave("BoxplotIndepend.png", 
+       plot = independ_boxplot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
+#selfcontrol
+
+selfcontrol_boxplot <- ggplot(turnover) +
+  aes(
+    x = as.factor(event),
+    y = selfcontrol
+  ) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Censura", y = "Selfcontrol")+
+  theme_classic()
+
+ggsave("BoxplotSelfControl.png", 
+       plot = selfcontrol_boxplot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
+
+#anxiety
+
+anxiety_boxplot <- ggplot(turnover) +
+  aes(
+    x = as.factor(event),
+    y = anxiety
+  ) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Censura", y = "Anxiety")+
+  theme_classic()
+
+ggsave("BoxplotAnxiety.png", 
+       plot = anxiety_boxplot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
+
+#Novator
+
+novator_boxplot <- ggplot(turnover) +
+  aes(
+    x = as.factor(event),
+    y = novator
+  ) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Censura", y = "Novator")+
+  theme_classic()
+
+ggsave("BoxplotNovator.png", 
+       plot = novator_boxplot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
 
 
 #-----------------------------------------------------------------------------------------------#----
