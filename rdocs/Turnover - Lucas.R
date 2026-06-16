@@ -444,8 +444,28 @@ Way_wilcoxon <- survdiff(Surv(stag, event) ~ way, rho = 1 )
 #O wilcoxon diz que tem diferença entre os grupos 
 
 
-#Extraversion
+#Age
+age_boxplot <- ggplot(turnover) +
+  aes(
+    x = as.factor(event),
+    y = age
+  ) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Censura", y = "Age")+
+  theme_classic()
 
+ggsave("BoxplotAge.png", 
+       plot = age_boxplot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
+
+#Extraversion
 extraversion_boxplot <- ggplot(turnover) +
   aes(
     x = as.factor(event),
@@ -487,7 +507,6 @@ ggsave("BoxplotIndepend.png",
        path = caminho_curvaSobrevivencia) 
 
 #selfcontrol
-
 selfcontrol_boxplot <- ggplot(turnover) +
   aes(
     x = as.factor(event),
@@ -509,7 +528,6 @@ ggsave("BoxplotSelfControl.png",
 
 
 #anxiety
-
 anxiety_boxplot <- ggplot(turnover) +
   aes(
     x = as.factor(event),
@@ -531,7 +549,6 @@ ggsave("BoxplotAnxiety.png",
 
 
 #Novator
-
 novator_boxplot <- ggplot(turnover) +
   aes(
     x = as.factor(event),
