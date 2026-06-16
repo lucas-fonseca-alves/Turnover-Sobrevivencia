@@ -606,14 +606,14 @@ turnover_limpo <- turnover %>%
 modelo_intercepto_exp <- survreg(Surv(stag, event) ~ 1, data = turnover_limpo, dist = "exponential")
 summary(modelo_intercepto_exp)
 
-alfa_exp <- modelo_intercepto_exp$coefficients[1]
+alfa_exp <- exp(modelo_intercepto_exp$coefficients[1])
 sobrev_exp <- exp(-tempo_km/alfa_exp)
 
 
 modelo_intercepto_weibull <- survreg(Surv(stag, event) ~ 1, data = turnover_limpo, dist = "weibull")
 summary(modelo_intercepto_weibull)
 
-alfa_weibull <- modelo_intercepto_weibull$coefficients
+alfa_weibull <- exp(modelo_intercepto_weibull$coefficients)
 gamma_weibull <- 1/modelo_intercepto_weibull$scale
 
 sobrev_weibull <- exp(-(tempo_km/alfa_weibull)^gamma_weibull)
@@ -629,8 +629,8 @@ sobrev_lognormal <- (1-plnorm(tempo_km, media_log, desvioPadrao_log))
 
 modelo_intercepto_loglogistic  <- survreg(Surv(stag, event) ~ 1, data = turnover_limpo, dist = "loglogistic")
 
-alfa_loglogistic <- modelo_intercepto_loglogistic$coefficients
-gamma_loglogistic <- modelo_intercepto_loglogistic$scale
+alfa_loglogistic <- exp(modelo_intercepto_loglogistic$coefficients)
+gamma_loglogistic <- 1/modelo_intercepto_loglogistic$scale
 
 sobrev_loglogistic <- 1/(1+(tempo_km/alfa_loglogistic)^gamma_loglogistic)
 
@@ -655,8 +655,20 @@ legend("topright",
 dev.off()
 
 
-#Pelo gráfico o lognormal é a que mais se adequa
+#Pelo gráfico o Weibull é a que mais se adequa
+# Rank Gráfico
+# Weibull
+# Exponencial
+# log logistica
+# log normal
 
+
+n <- nrow(turnover_limpo)
+p <- length(turnover_limpo)-2
+
+n/p
+
+#Como n/p é maior que 40, recomenda-se o AIC
 
 aic_val <- c(AIC(modelo_intercepto_exp), 
              AIC(modelo_intercepto_weibull), 
@@ -672,6 +684,21 @@ bic_val <- c(BIC(modelo_intercepto_exp),
 
 #Pelas medidas a loglogistica é a melhor
 
+#Rank AIC
+# loglogistic	6032,215
+# Weibull	6032,548
+# Lognormal	6033,234
+# Exponencial	6034,613
+
+#Rank BIC
+# Exponencial	6039,642
+# loglogistic	6042,273
+# Weibull	6042,606
+# Lognormal	6043,292
+
+
+
+#==============================Log-Normal===============================================
 
 #-----------------------------------------------------------------------------------------------#----
 #7) Utilize a densidade definida na etapa 6 e ajuste modelos de regressão com uma única covariável. 
@@ -876,3 +903,616 @@ plot(rank(tempo), devw,
 
 #identify(rank(tempo), devw)
 
+
+
+#======================================WEIBULL========================================================
+#-----------------------------------------------------------------------------------------------#----
+#7) Utilize a densidade definida na etapa 6 e ajuste modelos de regressão com uma única covariável. 
+#-----------------------------------------------------------------------------------------------#----
+
+
+weibull_gender  <- survreg(Surv(stag, event) ~ gender, data = turnover_limpo, dist = "weibull")
+summary(weibull_gender)
+
+#*
+weibull_age  <- survreg(Surv(stag, event) ~ age, data = turnover_limpo, dist = "weibull")
+summary(weibull_age)
+
+weibull_industry  <- survreg(Surv(stag, event) ~ industry, data = turnover_limpo, dist = "weibull")
+summary(weibull_industry)
+
+weibull_profession  <- survreg(Surv(stag, event) ~ profession, data = turnover_limpo, dist = "weibull")
+summary(weibull_profession)
+
+weibull_traffic  <- survreg(Surv(stag, event) ~ traffic, data = turnover_limpo, dist = "weibull")
+summary(weibull_traffic)
+
+weibull_coach  <- survreg(Surv(stag, event) ~ coach, data = turnover_limpo, dist = "weibull")
+summary(weibull_coach)
+
+weibull_headGender  <- survreg(Surv(stag, event) ~ head_gender, data = turnover_limpo, dist = "weibull")
+summary(weibull_headGender)
+
+weibull_greywage  <- survreg(Surv(stag, event) ~ greywage, data = turnover_limpo, dist = "weibull")
+summary(weibull_greywage)
+
+weibull_way <- survreg(Surv(stag, event) ~ way, data = turnover_limpo, dist = "weibull")
+summary(weibull_way)
+
+weibull_extraversion <- survreg(Surv(stag, event) ~ extraversion, data = turnover_limpo, dist = "weibull")
+summary(weibull_extraversion)
+
+weibull_independ <- survreg(Surv(stag, event) ~ independ, data = turnover_limpo, dist = "weibull")
+summary(weibull_independ)
+
+weibull_selfcontrol <- survreg(Surv(stag, event) ~ selfcontrol, data = turnover_limpo, dist = "weibull")
+summary(weibull_selfcontrol)
+
+weibull_anxiety <- survreg(Surv(stag, event) ~ anxiety, data = turnover_limpo, dist = "weibull")
+summary(weibull_anxiety)
+
+weibull_novator <- survreg(Surv(stag, event) ~ novator, data = turnover_limpo, dist = "weibull")
+summary(weibull_novator)
+
+
+
+#-----------------------------------------------------------------------------------------------#----
+#8) Construir um modelo completo de regressão com todas as covariáveis que foram significativas ao 
+#nível de 10% na etapa 7
+#-----------------------------------------------------------------------------------------------#----
+
+modelo_weibull <- survreg(Surv(stag, event) ~ gender +
+                              age +
+                              industry +
+                              profession +
+                              traffic +
+                              coach +
+                              head_gender +
+                              greywage +
+                              way +
+                              extraversion +
+                              independ +
+                              selfcontrol +
+                              anxiety +
+                              novator, 
+                            data = turnover_limpo, dist = "weibull")
+summary(modelo_weibull)
+
+#-----------------------------------------------------------------------------------------------#----
+# 9) Excluir covariáveis não significativas (a nível de 10%) na etapa 8 uma de cada vez. Se essa etapa 
+# não se aplica a esses dados, passe para a etapa10
+#-----------------------------------------------------------------------------------------------#----
+
+stepAIC(modelo_weibull, direction = "backward")
+
+#Surv(stag, event) ~ age + industry + profession + traffic + greywage + way + selfcontrol + anxiety, data = turnover_limpo, 
+#dist = "weibull"
+
+stepAIC(modelo_intercepto_weibull, 
+        direction = "forward",
+        scope = list(lower = formula(modelo_intercepto_weibull), upper = modelo_weibull))
+# survreg(formula = Surv(stag, event) ~ industry + traffic + greywage + 
+#           age + selfcontrol + anxiety + profession + way, data = turnover_limpo, 
+#         dist = "weibull")
+
+stepAIC(modelo_intercepto_weibull, 
+        scope = list(upper = modelo_weibull, lower = modelo_intercepto_weibull), 
+        direction = "both")
+
+# survreg(formula = Surv(stag, event) ~ industry + traffic + greywage + 
+#           age + selfcontrol + anxiety + profession + way, data = turnover_limpo, 
+#         dist = "weibull")
+
+#OBS: TODOS os métodos chegaram a mesma seleção de variáveis
+
+modelo_weibull_8va <- survreg(Surv(stag, event) ~ 
+                                  age +
+                                  industry +
+                                  profession +
+                                  traffic +
+                                  greywage +
+                                  way +
+                                  selfcontrol +
+                                  anxiety,
+                                data = turnover_limpo, dist = "weibull")
+summary(modelo_weibull_8va)
+
+
+
+#-----------------------------------------------------------------------------------------------#----
+# 13) Verifique a qualidade do ajuste do modelo final
+#-----------------------------------------------------------------------------------------------#----
+#cox snell
+
+tempo <- turnover_limpo$stag
+mi <- modelo_weibull_8va$linear.predictors
+
+
+Smod <- pnorm((-log(tempo)+mi)/modelo_weibull_8va$scale)
+ei <- (-log(Smod)) #resíduo de Cox Snell
+
+KMew <- survfit(Surv(ei, turnover_limpo$event)~1,conf.int = F)
+te <- KMew$time #Resíduo de Cox-Snell
+ste <- KMew$surv
+sexp <- exp(-te)
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_weibull_8va_KMxEP.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
+plot(ste, sexp, 
+     xlab = "S(ei): Kaplan-Meier",
+     ylab = "S(ei): Exponencial Padrão")
+
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
+
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_weibull_8va_CoxSnell.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
+plot(KMew, conf.int = F, 
+     xlab = "Resíduos de Cox-Snell",
+     ylab = 'Sobrevivência Estimada')
+lines(te, sexp, lty=2, col=2)
+legend(
+  20,
+  1.0,
+  lty = c(1,2),
+  col = c(1,2),
+  c("Kaplan-Meier", "Exponencial Padrão"),
+  cex=0.8,
+  bty = "n"
+)
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
+
+
+#Ajuste terrível, superestimou toda curva.
+
+#martingal 
+
+martingal <- turnover_limpo$event-ei
+
+par(mfrow=c(1,1))
+plot(tempo, martingal,
+     xlab = "log(tempo)",
+     ylab = "Residuo Martingal",  
+     pch = turnover_limpo$event+1
+     
+)
+
+plot(rank(tempo), martingal,
+     xlab = "Rank das Observações",
+     ylab = "Resíduos Martingal",
+     pch = turnover_limpo$event+1
+)
+
+#identify(rank(tempo), martingal)
+
+#deviance
+devw <- (martingal/abs(martingal))*(-2*(martingal+turnover_limpo$event*log(turnover_limpo$event-martingal)))^(1/2)
+plot(tempo, devw,
+     xlab = "log(tempo)",
+     ylab = "Resíduos Deviance",
+     pch = turnover_limpo$event)
+
+plot(rank(tempo), devw,
+     xlab = "ranks das observações",
+     ylab = "Resíduos Deviance",
+     pch = turnover_limpo$event+1)
+
+#identify(rank(tempo), devw)
+
+
+
+
+
+#===============================Exponencial==========================================================
+
+#-----------------------------------------------------------------------------------------------#----
+#7) Utilize a densidade definida na etapa 6 e ajuste modelos de regressão com uma única covariável. 
+#-----------------------------------------------------------------------------------------------#----
+
+
+exponential_gender  <- survreg(Surv(stag, event) ~ gender, data = turnover_limpo, dist = "exponential")
+summary(exponential_gender)
+
+#*
+exponential_age  <- survreg(Surv(stag, event) ~ age, data = turnover_limpo, dist = "exponential")
+summary(exponential_age)
+
+exponential_industry  <- survreg(Surv(stag, event) ~ industry, data = turnover_limpo, dist = "exponential")
+summary(exponential_industry)
+
+exponential_profession  <- survreg(Surv(stag, event) ~ profession, data = turnover_limpo, dist = "exponential")
+summary(exponential_profession)
+
+exponential_traffic  <- survreg(Surv(stag, event) ~ traffic, data = turnover_limpo, dist = "exponential")
+summary(exponential_traffic)
+
+exponential_coach  <- survreg(Surv(stag, event) ~ coach, data = turnover_limpo, dist = "exponential")
+summary(exponential_coach)
+
+exponential_headGender  <- survreg(Surv(stag, event) ~ head_gender, data = turnover_limpo, dist = "exponential")
+summary(exponential_headGender)
+
+exponential_greywage  <- survreg(Surv(stag, event) ~ greywage, data = turnover_limpo, dist = "exponential")
+summary(exponential_greywage)
+
+exponential_way <- survreg(Surv(stag, event) ~ way, data = turnover_limpo, dist = "exponential")
+summary(exponential_way)
+
+exponential_extraversion <- survreg(Surv(stag, event) ~ extraversion, data = turnover_limpo, dist = "exponential")
+summary(exponential_extraversion)
+
+exponential_independ <- survreg(Surv(stag, event) ~ independ, data = turnover_limpo, dist = "exponential")
+summary(exponential_independ)
+
+exponential_selfcontrol <- survreg(Surv(stag, event) ~ selfcontrol, data = turnover_limpo, dist = "exponential")
+summary(exponential_selfcontrol)
+
+exponential_anxiety <- survreg(Surv(stag, event) ~ anxiety, data = turnover_limpo, dist = "exponential")
+summary(exponential_anxiety)
+
+exponential_novator <- survreg(Surv(stag, event) ~ novator, data = turnover_limpo, dist = "exponential")
+summary(exponential_novator)
+
+
+
+#-----------------------------------------------------------------------------------------------#----
+#8) Construir um modelo completo de regressão com todas as covariáveis que foram significativas ao 
+#nível de 10% na etapa 7
+#-----------------------------------------------------------------------------------------------#----
+
+modelo_exponential <- survreg(Surv(stag, event) ~ gender +
+                            age +
+                            industry +
+                            profession +
+                            traffic +
+                            coach +
+                            head_gender +
+                            greywage +
+                            way +
+                            extraversion +
+                            independ +
+                            selfcontrol +
+                            anxiety +
+                            novator, 
+                          data = turnover_limpo, dist = "exponential")
+summary(modelo_exponential)
+
+#-----------------------------------------------------------------------------------------------#----
+# 9) Excluir covariáveis não significativas (a nível de 10%) na etapa 8 uma de cada vez. Se essa etapa 
+# não se aplica a esses dados, passe para a etapa10
+#-----------------------------------------------------------------------------------------------#----
+
+stepAIC(modelo_exponential, direction = "backward")
+
+#Surv(stag, event) ~ age + industry  + traffic + greywage + way + selfcontrol + anxiety, data = turnover_limpo, 
+#dist = "exponential"
+
+stepAIC(modelo_intercepto_exp, 
+        direction = "forward",
+        scope = list(lower = formula(modelo_intercepto_exp), upper = modelo_exponential))
+# survreg(formula = Surv(stag, event) ~ industry + traffic + greywage + 
+#           age + selfcontrol + anxiety  + way, data = turnover_limpo, 
+#         dist = "exponential")
+
+stepAIC(modelo_intercepto_exp, 
+        scope = list(upper = modelo_exponential, lower = modelo_intercepto_exp), 
+        direction = "both")
+
+# survreg(formula = Surv(stag, event) ~ industry + traffic + greywage + 
+#           age + selfcontrol + anxiety + way, data = turnover_limpo, 
+#         dist = "exponential")
+
+#OBS: TODOS os métodos chegaram a mesma seleção de variáveis
+
+modelo_exponential_7va <- survreg(Surv(stag, event) ~ 
+                                    age  +
+                                    industry  +
+                                    traffic  +
+                                    greywage  +
+                                    way  +
+                                    selfcontrol  +
+                                    anxiety  ,
+                              data = turnover_limpo, dist = "exponential")
+summary(modelo_exponential_7va)
+
+
+
+#-----------------------------------------------------------------------------------------------#----
+# 13) Verifique a qualidade do ajuste do modelo final
+#-----------------------------------------------------------------------------------------------#----
+#cox snell
+
+tempo <- turnover_limpo$stag
+mi <- modelo_exponential_7va$linear.predictors
+
+
+Smod <- pnorm((-log(tempo)+mi)/modelo_exponential_7va$scale)
+ei <- (-log(Smod)) #resíduo de Cox Snell
+
+KMew <- survfit(Surv(ei, turnover_limpo$event)~1,conf.int = F)
+te <- KMew$time #Resíduo de Cox-Snell
+ste <- KMew$surv
+sexp <- exp(-te)
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_exponential_7va_KMxEP.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
+plot(ste, sexp, 
+     xlab = "S(ei): Kaplan-Meier",
+     ylab = "S(ei): Exponencial Padrão")
+
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
+
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_exponential_7va_CoxSnell.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
+plot(KMew, conf.int = F, 
+     xlab = "Resíduos de Cox-Snell",
+     ylab = 'Sobrevivência Estimada')
+lines(te, sexp, lty=2, col=2)
+legend(
+  20,
+  1.0,
+  lty = c(1,2),
+  col = c(1,2),
+  c("Kaplan-Meier", "Exponencial Padrão"),
+  cex=0.8,
+  bty = "n"
+)
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
+
+
+#Ajuste terrível, superestimou toda curva.
+
+#martingal 
+
+martingal <- turnover_limpo$event-ei
+
+par(mfrow=c(1,1))
+plot(tempo, martingal,
+     xlab = "log(tempo)",
+     ylab = "Residuo Martingal",  
+     pch = turnover_limpo$event+1
+     
+)
+
+plot(rank(tempo), martingal,
+     xlab = "Rank das Observações",
+     ylab = "Resíduos Martingal",
+     pch = turnover_limpo$event+1
+)
+
+#identify(rank(tempo), martingal)
+
+#deviance
+devw <- (martingal/abs(martingal))*(-2*(martingal+turnover_limpo$event*log(turnover_limpo$event-martingal)))^(1/2)
+plot(tempo, devw,
+     xlab = "log(tempo)",
+     ylab = "Resíduos Deviance",
+     pch = turnover_limpo$event)
+
+plot(rank(tempo), devw,
+     xlab = "ranks das observações",
+     ylab = "Resíduos Deviance",
+     pch = turnover_limpo$event+1)
+
+#identify(rank(tempo), devw)
+
+
+
+
+
+
+#=========================================log logistica================================================
+
+
+#-----------------------------------------------------------------------------------------------#----
+#7) Utilize a densidade definida na etapa 6 e ajuste modelos de regressão com uma única covariável. 
+#-----------------------------------------------------------------------------------------------#----
+
+
+loglogistic_gender  <- survreg(Surv(stag, event) ~ gender, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_gender)
+
+#*
+loglogistic_age  <- survreg(Surv(stag, event) ~ age, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_age)
+
+loglogistic_industry  <- survreg(Surv(stag, event) ~ industry, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_industry)
+
+loglogistic_profession  <- survreg(Surv(stag, event) ~ profession, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_profession)
+
+loglogistic_traffic  <- survreg(Surv(stag, event) ~ traffic, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_traffic)
+
+loglogistic_coach  <- survreg(Surv(stag, event) ~ coach, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_coach)
+
+loglogistic_headGender  <- survreg(Surv(stag, event) ~ head_gender, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_headGender)
+
+loglogistic_greywage  <- survreg(Surv(stag, event) ~ greywage, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_greywage)
+
+loglogistic_way <- survreg(Surv(stag, event) ~ way, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_way)
+
+loglogistic_extraversion <- survreg(Surv(stag, event) ~ extraversion, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_extraversion)
+
+loglogistic_independ <- survreg(Surv(stag, event) ~ independ, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_independ)
+
+loglogistic_selfcontrol <- survreg(Surv(stag, event) ~ selfcontrol, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_selfcontrol)
+
+loglogistic_anxiety <- survreg(Surv(stag, event) ~ anxiety, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_anxiety)
+
+loglogistic_novator <- survreg(Surv(stag, event) ~ novator, data = turnover_limpo, dist = "loglogistic")
+summary(loglogistic_novator)
+
+
+
+#-----------------------------------------------------------------------------------------------#----
+#8) Construir um modelo completo de regressão com todas as covariáveis que foram significativas ao 
+#nível de 10% na etapa 7
+#-----------------------------------------------------------------------------------------------#----
+
+modelo_loglogistic <- survreg(Surv(stag, event) ~ gender +
+                                age +
+                                industry +
+                                profession +
+                                traffic +
+                                coach +
+                                head_gender +
+                                greywage +
+                                way +
+                                extraversion +
+                                independ +
+                                selfcontrol +
+                                anxiety +
+                                novator, 
+                              data = turnover_limpo, dist = "loglogistic")
+summary(modelo_loglogistic)
+
+#-----------------------------------------------------------------------------------------------#----
+# 9) Excluir covariáveis não significativas (a nível de 10%) na etapa 8 uma de cada vez. Se essa etapa 
+# não se aplica a esses dados, passe para a etapa10
+#-----------------------------------------------------------------------------------------------#----
+
+stepAIC(modelo_loglogistic, direction = "backward")
+
+# survreg(formula = Surv(stag, event) ~ age + industry + profession + 
+#           traffic + greywage + selfcontrol + anxiety, data = turnover_limpo, 
+#         dist = "loglogistic")
+
+stepAIC(modelo_intercepto_loglogistic, 
+        direction = "forward",
+        scope = list(lower = formula(modelo_intercepto_loglogistic), upper = modelo_loglogistic))
+# survreg(formula = Surv(stag, event) ~ greywage + industry + traffic + 
+#           age + selfcontrol + profession + anxiety, data = turnover_limpo, 
+#         dist = "loglogistic")
+
+stepAIC(modelo_intercepto_loglogistic, 
+        scope = list(upper = modelo_loglogistic, lower = modelo_intercepto_loglogistic), 
+        direction = "both")
+
+# survreg(formula = Surv(stag, event) ~ greywage + industry + traffic + 
+#           age + selfcontrol + profession + anxiety, data = turnover_limpo, 
+#         dist = "loglogistic")
+
+
+#OBS: TODOS os métodos chegaram a mesma seleção de variáveis
+
+modelo_loglogistic_7va <- survreg(Surv(stag, event) ~ 
+                                    age  +
+                                    industry  +
+                                    profession  +
+                                    traffic  +
+                                    greywage  +
+                                    selfcontrol  +
+                                    anxiety  ,
+                                  data = turnover_limpo, dist = "loglogistic")
+summary(modelo_loglogistic_7va)
+
+
+
+#-----------------------------------------------------------------------------------------------#----
+# 13) Verifique a qualidade do ajuste do modelo final
+#-----------------------------------------------------------------------------------------------#----
+#cox snell
+
+tempo <- turnover_limpo$stag
+mi <- modelo_loglogistic_7va$linear.predictors
+
+
+Smod <- pnorm((-log(tempo)+mi)/modelo_loglogistic_7va$scale)
+ei <- (-log(Smod)) #resíduo de Cox Snell
+
+KMew <- survfit(Surv(ei, turnover_limpo$event)~1,conf.int = F)
+te <- KMew$time #Resíduo de Cox-Snell
+ste <- KMew$surv
+sexp <- exp(-te)
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_loglogistic_7va_KMxEP.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
+plot(ste, sexp, 
+     xlab = "S(ei): Kaplan-Meier",
+     ylab = "S(ei): Exponencial Padrão")
+
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
+
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_exponential_7va_CoxSnell.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
+plot(KMew, conf.int = F, 
+     xlab = "Resíduos de Cox-Snell",
+     ylab = 'Sobrevivência Estimada')
+lines(te, sexp, lty=2, col=2)
+legend(
+  20,
+  1.0,
+  lty = c(1,2),
+  col = c(1,2),
+  c("Kaplan-Meier", "Exponencial Padrão"),
+  cex=0.8,
+  bty = "n"
+)
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
+
+
+#Ajuste terrível, superestimou toda curva.
+
+#martingal 
+
+martingal <- turnover_limpo$event-ei
+
+par(mfrow=c(1,1))
+plot(tempo, martingal,
+     xlab = "log(tempo)",
+     ylab = "Residuo Martingal",  
+     pch = turnover_limpo$event+1
+     
+)
+
+plot(rank(tempo), martingal,
+     xlab = "Rank das Observações",
+     ylab = "Resíduos Martingal",
+     pch = turnover_limpo$event+1
+)
+
+#identify(rank(tempo), martingal)
+
+#deviance
+devw <- (martingal/abs(martingal))*(-2*(martingal+turnover_limpo$event*log(turnover_limpo$event-martingal)))^(1/2)
+plot(tempo, devw,
+     xlab = "log(tempo)",
+     ylab = "Resíduos Deviance",
+     pch = turnover_limpo$event)
+
+plot(rank(tempo), devw,
+     xlab = "ranks das observações",
+     ylab = "Resíduos Deviance",
+     pch = turnover_limpo$event+1)
+
+#identify(rank(tempo), devw)
