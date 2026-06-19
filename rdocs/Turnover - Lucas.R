@@ -130,17 +130,30 @@ dev.off()
 # Kaplan-Meier (KM) e teste de comparação das curvas.
 #-----------------------------------------------------------------------------------------------#----
 
+cores_grupos2 <- c("#7E1A2FFF", "#579EA4FF", "#DF7713FF","#bc5090", "#F9C000FF", 
+                  "#86AD34FF", "#5D7298FF", "#FF4D6FFF", "#2D2651FF", "#C8350DFF", 
+                  "#81B28DFF", "#BD777AFF", "#1942CDFF","#0F542FFF","#8C37E5FF", "#BA6E1DFF")
+
 cores_grupos <- c(
   "#E5989B",  # rosa queimado,
   "#264653",  # azul escuro
   "#2A9D8F",  # verde petróleo
-  "#E9C46A",  # areia/dourado
-  "#F4A261",  # laranja terroso
-  "#E76F51",  # coral/terracota
+  "#E9C46A",
+  "#86AD34FF",# areia/dourado
+  "#DF7713FF",  # laranja terroso
   "#457B9D",  # azul médio
   "#A8DADC",  # azul claro
-  "#1D3557",  # azul marinho
-  "#B5838D",  # rosa acinzentado
+  "#AE56DEFF",  # coral
+  
+  "#B5838D",# rosa acinzentado
+  "#54D8B1FF",
+  "#8a5082",  # roxo acinzentado
+  "#bc5090",  # rosa magenta
+  
+  "#800000FF",
+  "#68855CFF",
+  "#BA6E1DFF",
+  
   "#6D6875",  # roxo acinzentado
   "#FFB4A2",  # salmão claro
 
@@ -151,7 +164,6 @@ cores_grupos <- c(
   "#2c4875",  # azul médio
   "#8a5082",  # roxo acinzentado
   "#bc5090",  # rosa magenta
-  "#ff6361",  # coral
   "#ff8531",  # laranja queimado
   "#ffa600",  # dourado
   "#7a5195",  # roxo profundo
