@@ -1446,6 +1446,7 @@ plot(rank(tempo), devw,
 
 
 
+
 #=========================================log logistica================================================
 #-----------------------------------------------------------------------------------------------#----
 #7) Utilize a densidade definida na etapa 6 e ajuste modelos de regressão com uma única covariável. 
@@ -1728,6 +1729,7 @@ bic_val <- c(BIC(modelo_intercepto_extremePadrao),
 
 
 
+
 #=================Exponencial -> log Exponencial ou Valor Extremo Padrão===========================
 #-----------------------------------------------------------------------------------------------#----
 #7) Utilize a densidade definida na etapa 6 e ajuste modelos de regressão com uma única covariável. 
@@ -1846,10 +1848,10 @@ summary(modelo_extremePadrao_8va)
 # 13) Verifique a qualidade do ajuste do modelo final
 #-----------------------------------------------------------------------------------------------#----
 #cox snell
-y     <- log(turnover_limpo$stag)
+Y     <- log(turnover_limpo$stag)
 mu    <- modelo_extremePadrao_8va$linear.predictors
 
-Smod <- exp(-exp((y - mu)))
+Smod <- exp(-exp((Y - mu)))
 ei <- -log(Smod)  # resíduos de Cox-Snell
 
 KMew <- survfit(Surv(ei, turnover_limpo$event) ~ 1, conf.int = FALSE)
@@ -2055,11 +2057,11 @@ summary(modelo_extreme_8va)
 # 13) Verifique a qualidade do ajuste do modelo final
 #-----------------------------------------------------------------------------------------------#----
 #cox snell
-y     <- log(turnover_limpo$stag)
+Y     <- log(turnover_limpo$stag)
 mu    <- modelo_extreme_8va$linear.predictors
 sigma <- 1/modelo_extreme_8va$scale
 
-Smod <- exp(-exp((y - mu)/sigma))
+Smod <- exp(-exp((Y - mu)/sigma))
 ei <- -log(Smod)   # resíduos de Cox-Snell
 
 KMew <- survfit(Surv(ei, turnover_limpo$event) ~ 1, conf.int = FALSE)
@@ -2262,7 +2264,7 @@ summary(modelo_gaussian_8va)
 # 13) Verifique a qualidade do ajuste do modelo final
 #-----------------------------------------------------------------------------------------------#----
 #cox snell
-y     <- log(turnover_limpo$stag)
+Y     <- log(turnover_limpo$stag)
 mu    <- modelo_gaussian_8va$linear.predictors
 sigma <- modelo_gaussian_8va$scale
 
@@ -2489,7 +2491,7 @@ summary(modelo_logistic_8va)
 #***========================= Modelo com 7 variáveis =============================================***
 
 #cox snell
-y     <- log(turnover_limpo$stag)
+Y     <- log(turnover_limpo$stag)
 mu    <- modelo_logistic_7va$linear.predictors
 sigma <- modelo_logistic_7va$scale
 
@@ -2576,7 +2578,7 @@ plot(rank(tempo), devw,
 #***========================= Modelo com 8 variáveis =============================================***
 
 #cox snell
-y     <- log(turnover_limpo$stag)
+Y     <- log(turnover_limpo$stag)
 mu    <- modelo_logistic_8va$linear.predictors
 sigma <- modelo_logistic_8va$scale
 
