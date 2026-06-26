@@ -54,7 +54,16 @@ curva_sobrevivencia <- ggsurvplot(km,
                                    censor = F, #Censura,
                                    censor.shape = 124,   # barra vertical
                                    censor.size = 3,
-                                   palette  = "black")
+                                   palette  = "black",
+                                  break.time.by = 25
+)
+
+curva_sobrevivencia$plot <- curva_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90"),
+    legend.position = "none"
+  )
 
 ggsave("CurvaSobrevivencia.png", 
        plot = curva_sobrevivencia$plot, 
@@ -74,7 +83,15 @@ curva_sobrevivenciaCensura <- ggsurvplot(km,
                                   #censor = F, #Censura,
                                   censor.shape = 124,   # barra vertical
                                   censor.size = 3,
-                                  palette  = "black")
+                                  palette  = "black",
+                                  break.time.by = 25)
+
+curva_sobrevivenciaCensura$plot <- curva_sobrevivenciaCensura$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90"),
+    legend.position = "none"
+  )
 
 ggsave("CurvaSobrevivenciaComCensura.png", 
        plot = curva_sobrevivenciaCensura$plot, 
@@ -95,7 +112,15 @@ curva_RiscoAcumulado <- ggsurvplot(km,
            ylab = "H(t)",
            legend = "none",
            palette = "black",
-           censor = F)
+           censor = F,
+           break.time.by = 25)
+
+curva_RiscoAcumulado$plot <- curva_RiscoAcumulado$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90"),
+    legend.position = "none"
+  )
 
 # curva_RiscoAcumulado$plot +
 #   geom_hline(yintercept = 4, linetype = "dashed", color = "red")
@@ -188,14 +213,22 @@ gender_sobrevivencia <- ggsurvplot(km_gender,
            xlab = "Meses",
            ylab = "S(t)",
            legend = "right",        # posição
-           legend.title = "Gender",
-           font.legend = 8,         # tamanho
+           legend.title = "Gênero",
+           legend.labs = c("Feminino", "Masculino"),
+           font.legend = 12,         # tamanho
            legend.ncol = 2,
            palette = cores_grupos, # colunas
            # censor = F, #Censura,
            censor.shape = 124,   # barra vertical
-           censor.size = 3
-           )  
+           censor.size = 3,
+           break.time.by = 25)
+
+gender_sobrevivencia$plot <- gender_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
+
 ggsave("CurvaSobrevivenciaGender.png", 
        plot = gender_sobrevivencia$plot, 
        width = 8, 
@@ -236,14 +269,25 @@ industry_sobrevivencia <- ggsurvplot(km_industry,
                                    xlab = "Meses",
                                    ylab = "S(t)",
                                    legend = "right",        # posição
-                                   legend.title = "Industry",
-                                   font.legend = 8,         # tamanho
+                                   legend.title = "Indústria",
+                                   legend.labs = c("Agricultura","Bancos", "Construção", "Consultoria",
+                                                   "Outras", "HoReCa", "TI", "Manufatura", "Mineração", "Farmácia",
+                                                   "Energia", "Imobiliárias", "Varejo", "Estatais",
+                                                   "Telecomunicação", "Transporte"),
+                                   font.legend = 12,         # tamanho
                                    legend.ncol = 2,
                                    palette = cores_grupos, # colunas
                                    # censor = F, #Censura,
                                    censor.shape = 124,   # barra vertical
-                                   censor.size = 3
-)  
+                                   censor.size = 3,
+                                   break.time.by = 25)
+
+industry_sobrevivencia$plot <- industry_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
+
 ggsave("CurvaSobrevivenciaIndustry.png", 
        plot = industry_sobrevivencia$plot, 
        width = 8, 
@@ -269,14 +313,25 @@ profession_sobrevivencia <- ggsurvplot(km_profession,
                                      xlab = "Meses",
                                      ylab = "S(t)",
                                      legend = "right",        # posição
-                                     legend.title = "Profession",
-                                     font.legend = 8,         # tamanho
+                                     legend.title = "Profissão",
+                                     legend.labs = c("Contabilidade", "Negócios", "Comercial",
+                                                     "Consultoria", "Engenharia", "Outros", "Finanças", "RH",
+                                                     "TI", "Direito", "Gestão", "Marketing","RP", "Vendas",
+                                                     "Ensino"),
+                                     font.legend = 12,         # tamanho
                                      legend.ncol = 2,
                                      palette = cores_grupos, # colunas
                                      # censor = F, #Censura,
                                      censor.shape = 124,   # barra vertical
-                                     censor.size = 3
-)  
+                                     censor.size = 3,
+                                     break.time.by = 25)
+
+profession_sobrevivencia$plot <- profession_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
+
 ggsave("CurvaSobrevivenciaProfession.png", 
        plot = profession_sobrevivencia$plot, 
        width = 8, 
@@ -303,14 +358,25 @@ traffic_sobrevivencia <- ggsurvplot(km_traffic,
                                        xlab = "Meses",
                                        ylab = "S(t)",
                                        legend = "right",        # posição
-                                       legend.title = "Traffic",
-                                       font.legend = 8,         # tamanho
+                                       legend.title = "Canal de recrutamento",
+                                      legend.labs = c("Contato direto", "Recrutamento via portal",
+                                                      "Networking/conhecidos", "Agência de recrutamento",
+                                                      "Recomendação de terceiros","Indicação externa",
+                                                      "Indicação interna", "Candidatura via portal"),
+                                       font.legend = 12,         # tamanho
                                        legend.ncol = 2,
                                        palette = cores_grupos, # colunas
                                        # censor = F, #Censura,
                                        censor.shape = 124,   # barra vertical
-                                       censor.size = 3
-)  
+                                       censor.size = 3,
+                                    break.time.by = 25)
+
+traffic_sobrevivencia$plot <- traffic_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
+
 ggsave("CurvaSobrevivenciaTraffic.png", 
        plot = traffic_sobrevivencia$plot, 
        width = 8, 
@@ -338,13 +404,19 @@ coach_sobrevivencia <- ggsurvplot(km_coach,
                                     ylab = "S(t)",
                                     legend = "right",        # posição
                                     legend.title = "Coach",
-                                    font.legend = 8,         # tamanho
+                                    font.legend = 12,         # tamanho
                                     legend.ncol = 2,
                                     palette = cores_grupos, # colunas
                                     # censor = F, #Censura,
                                     censor.shape = 124,   # barra vertical
-                                    censor.size = 3
-)  
+                                    censor.size = 3,
+                                  break.time.by = 25)
+
+coach_sobrevivencia$plot <- coach_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
 ggsave("CurvaSobrevivenciaCoach.png", 
        plot = coach_sobrevivencia$plot, 
        width = 8, 
@@ -380,14 +452,21 @@ headGender_sobrevivencia <- ggsurvplot(km_HeadGender,
                                   xlab = "Meses",
                                   ylab = "S(t)",
                                   legend = "right",        # posição
-                                  legend.title = "Head Gender",
-                                  font.legend = 8,         # tamanho
+                                  legend.title = "Gênero Supervisor",
+                                  legend.labs = c("Feminino", "Masculino"),
+                                  font.legend = 12,         # tamanho
                                   legend.ncol = 2,
                                   palette = cores_grupos, # colunas
                                   # censor = F, #Censura,
                                   censor.shape = 124,   # barra vertical
-                                  censor.size = 3
-)  
+                                  censor.size = 3,
+                                  break.time.by = 25)
+
+headGender_sobrevivencia$plot <- headGender_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
 ggsave("CurvaSobrevivenciaHeadGender.png", 
        plot = headGender_sobrevivencia$plot, 
        width = 8, 
@@ -435,14 +514,22 @@ way_sobrevivencia <- ggsurvplot(km_Way,
                                 xlab = "Meses",
                                 ylab = "S(t)",
                                 legend = "right",        # posição
-                                legend.title = "Way",
-                                font.legend = 8,         # tamanho
+                                legend.title = "Transporte",
+                                legend.labs = c("Ônibus", "Carro", "A pé"),
+                                font.legend = 12,         # tamanho
                                 legend.ncol = 2,
                                 palette = cores_grupos, # colunas
                                 # censor = F, #Censura,
                                 censor.shape = 124,   # barra vertical
-                                censor.size = 3
-)  
+                                censor.size = 3,
+                                break.time.by = 25)
+
+way_sobrevivencia$plot <- way_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
+
 ggsave("CurvaSobrevivenciaWay.png", 
        plot = way_sobrevivencia$plot, 
        width = 8, 
@@ -469,8 +556,13 @@ age_boxplot <- ggplot(turnover) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Age")+
-  theme_classic()
+  labs(x = "Censura", y = "Idade")+
+  theme_classic() +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
+
 
 ggsave("BoxplotAge.png", 
        plot = age_boxplot, 
@@ -490,8 +582,12 @@ extraversion_boxplot <- ggplot(turnover) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Extraversion")+
-  theme_classic()
+  labs(x = "Censura", y = "Extroversão")+
+  theme_classic()+
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
 
 ggsave("BoxplotExtraversion.png", 
        plot = extraversion_boxplot, 
@@ -511,8 +607,12 @@ independ_boxplot <- ggplot(turnover) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Independ")+
-  theme_classic()
+  labs(x = "Censura", y = "Independência")+
+  theme_classic()+
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
 
 ggsave("BoxplotIndepend.png", 
        plot = independ_boxplot, 
@@ -531,8 +631,12 @@ selfcontrol_boxplot <- ggplot(turnover) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Selfcontrol")+
-  theme_classic()
+  labs(x = "Censura", y = "Autocontrole")+
+  theme_classic()+
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
 
 ggsave("BoxplotSelfControl.png", 
        plot = selfcontrol_boxplot, 
@@ -552,8 +656,12 @@ anxiety_boxplot <- ggplot(turnover) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Anxiety")+
-  theme_classic()
+  labs(x = "Censura", y = "Ansiedade")+
+  theme_classic()+
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
 
 ggsave("BoxplotAnxiety.png", 
        plot = anxiety_boxplot, 
@@ -573,8 +681,12 @@ novator_boxplot <- ggplot(turnover) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Novator")+
-  theme_classic()
+  labs(x = "Censura", y = "Inovação")+
+  theme_classic()+
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
 
 ggsave("BoxplotNovator.png", 
        plot = novator_boxplot, 
