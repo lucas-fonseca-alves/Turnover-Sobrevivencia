@@ -1,10 +1,12 @@
 library(readxl)
 library(tidyverse)
+library(tidyselect)
 library(survival)
 library(AdequacyModel)
 library(MASS)
 library(ggplot2)
 library(survminer)
+library(car)
 
 
 turnover <- read_excel("banco/turnover.xlsx")
@@ -1051,6 +1053,25 @@ bic_val <- c(BIC(modelo_intercepto_exp),
 
 
 
+#*** Verificação de Multicolinearidade ***#
+
+
+variaveis_numericas <- turnover %>% 
+  dplyr::select(where(is.numeric), -event)
+
+
+matriz_correlacao <-cor(variaveis_numericas, use = "complete.obs")
+
+
+library(ggcorrplot)
+
+ggcorrplot(matriz_correlacao, 
+           method = "square",      # quadrados coloridos
+           type = "upper",         # apenas parte superior
+           lab = TRUE,             # exibir valores numéricos
+           lab_size = 3,
+           colors = c("red", "white", "blue"),
+           title = "Matriz de Correlação")
 
 
 #-----------------------------------------------------------------------------------------------#----
@@ -1376,6 +1397,8 @@ summary(modelo_weibull_8va)
 
 
 
+
+
 #-----------------------------------------------------------------------------------------------#----
 # 13) Verifique a qualidade do ajuste do modelo final
 #-----------------------------------------------------------------------------------------------#----
@@ -1427,8 +1450,6 @@ legend(
 dev.off()
 
 
-#Ajuste terrível, superestimou toda curva.
-
 #martingal 
 
 martingal <- turnover_limpo$event-ei
@@ -1464,7 +1485,9 @@ plot(rank(tempo), devw,
 #identify(rank(tempo), devw)
 
 
+#*** Verificação de Fator de Inflação da Variância (VIF) ***#
 
+car::vif(modelo_weibull_8va)
 
 
 #===============================Exponencial==========================================================
