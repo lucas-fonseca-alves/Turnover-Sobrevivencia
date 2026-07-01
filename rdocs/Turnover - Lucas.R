@@ -894,13 +894,13 @@ png(filename = "resultados/Ajuste_Distribuicoes/Distribuicoes_Implementadas.png"
 plot(km, conf.int = FALSE, mark.time = FALSE,
      xlab = "Tempo", ylab = "Sobrevivência",
      main = "Comparação de distribuições")
-lines(tempo_km, sobrev_exp, col = "blue", lwd=2)
-lines(tempo_km, sobrev_weibull, col = "red", lwd=2)
-lines(tempo_km, sobrev_lognormal, col = "green", lwd=2)
-lines(tempo_km, sobrev_loglogistic, col = "orange", lwd=2)
+lines(tempo_km, sobrev_exp, col = "#E5989B", lwd=2)
+lines(tempo_km, sobrev_weibull, col = "#264653", lwd=2)
+lines(tempo_km, sobrev_lognormal, col = "#2A9D8F", lwd=2)
+lines(tempo_km, sobrev_loglogistic, col = "#E9C46A", lwd=2)
 legend("topright",
        legend = c("Exponencial", "Weibull", "Log-normal", "Log-logística"),
-       col= c("blue", "red", "green", "orange"), 
+       col= c("#E5989B", "#264653", "#2A9D8F", "#E9C46A"), 
        lwd = 2
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -1822,22 +1822,27 @@ sigma_logistic <- modelo_intercepto_logistic$scale
 sobrev_logistic <- 1/(1+exp((tempo_km_Y-mi_logistic)/sigma_logistic))
 
 
+png(filename = "resultados/Ajuste_Distribuicoes/Distribuicoes_Implementadas_loc_escala.png", width = 800, height = 600)
+
+# 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(km_Y, conf.int = FALSE, mark.time = FALSE,
      xlab = "log(Tempo)", ylab = "Sobrevivência",
      main = "Comparação de distribuições")
-lines(tempo_km_Y, sobrev_extremePadrao, col = "blue", lwd=2)
-lines(tempo_km_Y, sobrev_extreme, col = "red", lwd=2)
-lines(tempo_km_Y, sobrev_normal, col = "green", lwd=2)
-lines(tempo_km_Y, sobrev_logistic, col = "orange", lwd=2)
+lines(tempo_km_Y, sobrev_extremePadrao, col = "#E5989B", lwd=2)
+lines(tempo_km_Y, sobrev_extreme, col = "#264653", lwd=2)
+lines(tempo_km_Y, sobrev_gaussian, col = "#2A9D8F", lwd=2)
+lines(tempo_km_Y, sobrev_logistic, col = "#E9C46A", lwd=2)
 legend("bottomleft",
        legend = c("Extremo Padrão", "Extremo", "Normal", "Logística"),
-       col= c("blue", "red", "green", "orange"), 
+       col= c("#E5989B", "#264653", "#2A9D8F", "#E9C46A"), 
        lwd = 2
 )
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
 
 aic_val <- c(AIC(modelo_intercepto_extremePadrao), 
              AIC(modelo_intercepto_extreme), 
-             AIC(modelo_intercepto_normal), 
+             AIC(modelo_intercepto_gaussian), 
              AIC(modelo_intercepto_logistic))
 
 
