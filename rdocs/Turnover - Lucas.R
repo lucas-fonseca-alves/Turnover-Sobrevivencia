@@ -1,10 +1,12 @@
 library(readxl)
 library(tidyverse)
+library(tidyselect)
 library(survival)
 library(AdequacyModel)
 library(MASS)
 library(ggplot2)
 library(survminer)
+library(car)
 
 
 turnover <- read_excel("banco/turnover.xlsx")
@@ -403,7 +405,8 @@ coach_sobrevivencia <- ggsurvplot(km_coach,
                                     xlab = "Meses",
                                     ylab = "S(t)",
                                     legend = "right",        # posição
-                                    legend.title = "Coach",
+                                    legend.title = "Mentoria",
+                                    legend.labs = c("Chefe direto", "Não", "Sim"),
                                     font.legend = 12,         # tamanho
                                     legend.ncol = 2,
                                     palette = cores_grupos, # colunas
@@ -495,6 +498,35 @@ legend("topright",
        lty = 2
 )
 
+GreyWage_sobrevivencia <- ggsurvplot(km_GreyWage, 
+                                       data = turnover,
+                                       conf.int = FALSE,
+                                       xlab = "Meses",
+                                       ylab = "S(t)",
+                                       legend = "right",        # posição
+                                       legend.title = "Salário cinza",
+                                       legend.labs = c("Sim", "Não"),
+                                       font.legend = 12,         # tamanho
+                                       legend.ncol = 2,
+                                       palette = cores_grupos, # colunas
+                                       # censor = F, #Censura,
+                                       censor.shape = 124,   # barra vertical
+                                       censor.size = 3,
+                                       break.time.by = 25)
+
+GreyWage_sobrevivencia$plot <- GreyWage_sobrevivencia$plot +
+  theme(
+    panel.grid.major = element_line(color = "grey80"),
+    panel.grid.minor = element_line(color = "grey90")
+  )
+
+ggsave("CurvaSobrevivenciaGreyWage.png", 
+       plot = GreyWage_sobrevivencia$plot, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
+
 
 #Teste de Comparação
 GreyWage_logRank <- survdiff(Surv(stag, event) ~ greywage, rho = 0)
@@ -552,11 +584,13 @@ age_boxplot <- ggplot(turnover) +
     x = as.factor(event),
     y = age
   ) +
-  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  geom_boxplot(fill = c("#E5989B"), width = 0.5) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Idade")+
+  scale_x_discrete(labels = c("0" = "Censura",
+                              "1" = "Falha")) +
+  labs(x = "", y = "Idade")+
   theme_classic() +
   theme(
     panel.grid.major = element_line(color = "grey80"),
@@ -571,6 +605,15 @@ ggsave("BoxplotAge.png",
        dpi = 300,
        path = caminho_curvaSobrevivencia) 
 
+resumo_age <- turnover %>%
+  group_by(event) %>%
+  summarise(media = mean(age),
+            desvio = sd(age),
+            min = min(age),
+            quartil1 = quantile(age,0.25),
+            mediana = quantile(age,0.5), 
+            quartil3 = quantile(age,0.75),
+            max = max(age))
 
 #Extraversion
 extraversion_boxplot <- ggplot(turnover) +
@@ -578,11 +621,13 @@ extraversion_boxplot <- ggplot(turnover) +
     x = as.factor(event),
     y = extraversion
   ) +
-  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  geom_boxplot(fill = c("#E5989B"), width = 0.5) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Extroversão")+
+  scale_x_discrete(labels = c("0" = "Censura",
+                              "1" = "Falha")) +
+  labs(x = "", y = "Extroversão")+
   theme_classic()+
   theme(
     panel.grid.major = element_line(color = "grey80"),
@@ -596,6 +641,16 @@ ggsave("BoxplotExtraversion.png",
        dpi = 300,
        path = caminho_curvaSobrevivencia) 
 
+resumo_extraversion <- turnover %>%
+  group_by(event) %>%
+  summarise(media = mean(extraversion),
+            desvio = sd(extraversion),
+            min = min(extraversion),
+            quartil1 = quantile(extraversion,0.25),
+            mediana = quantile(extraversion,0.5), 
+            quartil3 = quantile(extraversion,0.75),
+            max = max(extraversion))
+
 
 #Independ
 independ_boxplot <- ggplot(turnover) +
@@ -603,11 +658,13 @@ independ_boxplot <- ggplot(turnover) +
     x = as.factor(event),
     y = independ
   ) +
-  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  geom_boxplot(fill = c("#E5989B"), width = 0.5) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Independência")+
+  scale_x_discrete(labels = c("0" = "Censura",
+                              "1" = "Falha")) +
+  labs(x = "", y = "Independência")+
   theme_classic()+
   theme(
     panel.grid.major = element_line(color = "grey80"),
@@ -621,17 +678,28 @@ ggsave("BoxplotIndepend.png",
        dpi = 300,
        path = caminho_curvaSobrevivencia) 
 
+resumo_independ <- turnover %>%
+  group_by(event) %>%
+  summarise(media = mean(independ),
+            desvio = sd(independ),
+            min = min(independ),
+            quartil1 = quantile(independ,0.25),
+            mediana = quantile(independ,0.5), 
+            quartil3 = quantile(independ,0.75),
+            max = max(independ))
 #selfcontrol
 selfcontrol_boxplot <- ggplot(turnover) +
   aes(
     x = as.factor(event),
     y = selfcontrol
   ) +
-  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  geom_boxplot(fill = c("#E5989B"), width = 0.5) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
-  ) +
-  labs(x = "Censura", y = "Autocontrole")+
+  ) +   
+  scale_x_discrete(labels = c("0" = "Censura",
+                                    "1" = "Falha")) +
+  labs(x = "", y = "Autocontrole")+
   theme_classic()+
   theme(
     panel.grid.major = element_line(color = "grey80"),
@@ -645,6 +713,16 @@ ggsave("BoxplotSelfControl.png",
        dpi = 300,
        path = caminho_curvaSobrevivencia) 
 
+resumo_selfcontrol <- turnover %>%
+  group_by(event) %>%
+  summarise(media = mean(selfcontrol),
+            desvio = sd(selfcontrol),
+            min = min(selfcontrol),
+            quartil1 = quantile(selfcontrol,0.25),
+            mediana = quantile(selfcontrol,0.5), 
+            quartil3 = quantile(selfcontrol,0.75),
+            max = max(selfcontrol))
+
 
 #anxiety
 anxiety_boxplot <- ggplot(turnover) +
@@ -652,11 +730,13 @@ anxiety_boxplot <- ggplot(turnover) +
     x = as.factor(event),
     y = anxiety
   ) +
-  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  geom_boxplot(fill = c("#E5989B"), width = 0.5) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Ansiedade")+
+  scale_x_discrete(labels = c("0" = "Censura",
+                              "1" = "Falha")) +
+  labs(x = "", y = "Ansiedade")+
   theme_classic()+
   theme(
     panel.grid.major = element_line(color = "grey80"),
@@ -671,17 +751,30 @@ ggsave("BoxplotAnxiety.png",
        path = caminho_curvaSobrevivencia) 
 
 
+resumo_anxiety <- turnover %>%
+  group_by(event) %>%
+  summarise(media = mean(anxiety),
+            desvio = sd(anxiety),
+            min = min(anxiety),
+            quartil1 = quantile(anxiety,0.25),
+            mediana = quantile(anxiety,0.5), 
+            quartil3 = quantile(anxiety,0.75),
+            max = max(anxiety))
+
+
 #Novator
 novator_boxplot <- ggplot(turnover) +
   aes(
     x = as.factor(event),
     y = novator
   ) +
-  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  geom_boxplot(fill = c("#E5989B"), width = 0.5) +
   stat_summary(
     fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
   ) +
-  labs(x = "Censura", y = "Inovação")+
+  scale_x_discrete(labels = c("0" = "Censura",
+                              "1" = "Falha")) +
+  labs(x = "", y = "Inovação")+
   theme_classic()+
   theme(
     panel.grid.major = element_line(color = "grey80"),
@@ -694,6 +787,16 @@ ggsave("BoxplotNovator.png",
        height = 6, 
        dpi = 300,
        path = caminho_curvaSobrevivencia) 
+
+resumo_novator <- turnover %>%
+  group_by(event) %>%
+  summarise(media = mean(novator),
+            desvio = sd(novator),
+            min = min(novator),
+            quartil1 = quantile(novator,0.25),
+            mediana = quantile(novator,0.5), 
+            quartil3 = quantile(novator,0.75),
+            max = max(novator))
 
 
 #-----------------------------------------------------------------------------------------------#----
@@ -950,6 +1053,25 @@ bic_val <- c(BIC(modelo_intercepto_exp),
 
 
 
+#*** Verificação de Multicolinearidade ***#
+
+
+variaveis_numericas <- turnover %>% 
+  dplyr::select(where(is.numeric), -event)
+
+
+matriz_correlacao <-cor(variaveis_numericas, use = "complete.obs")
+
+
+library(ggcorrplot)
+
+ggcorrplot(matriz_correlacao, 
+           method = "square",      # quadrados coloridos
+           type = "upper",         # apenas parte superior
+           lab = TRUE,             # exibir valores numéricos
+           lab_size = 3,
+           colors = c("red", "white", "blue"),
+           title = "Matriz de Correlação")
 
 
 #-----------------------------------------------------------------------------------------------#----
@@ -1275,6 +1397,8 @@ summary(modelo_weibull_8va)
 
 
 
+
+
 #-----------------------------------------------------------------------------------------------#----
 # 13) Verifique a qualidade do ajuste do modelo final
 #-----------------------------------------------------------------------------------------------#----
@@ -1326,8 +1450,6 @@ legend(
 dev.off()
 
 
-#Ajuste terrível, superestimou toda curva.
-
 #martingal 
 
 martingal <- turnover_limpo$event-ei
@@ -1363,7 +1485,9 @@ plot(rank(tempo), devw,
 #identify(rank(tempo), devw)
 
 
+#*** Verificação de Fator de Inflação da Variância (VIF) ***#
 
+car::vif(modelo_weibull_8va)
 
 
 #===============================Exponencial==========================================================
