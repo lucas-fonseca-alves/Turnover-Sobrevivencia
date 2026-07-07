@@ -7,6 +7,7 @@ library(MASS)
 library(ggplot2)
 library(survminer)
 library(car)
+library(DescTools)
 
 
 turnover <- read_excel("banco/turnover.xlsx")
@@ -1073,6 +1074,53 @@ ggcorrplot(matriz_correlacao,
            colors = c("red", "white", "blue"),
            title = "Matriz de Correlação")
 
+#***------ Verificar se as variáveis categoricas são independentes-----***
+
+# H₀ (hipótese nula): As duas variáveis categóricas são independentes.
+# H₁ (hipótese alternativa): As duas variáveis categóricas não são independentes (existe associação entre elas).
+
+#Gender
+CramerV( turnover_limpo$gender  ,turnover_limpo$gender  )
+CramerV( turnover_limpo$gender  ,turnover_limpo$industry  )
+CramerV( turnover_limpo$gender  ,turnover_limpo$profession  )
+CramerV( turnover_limpo$gender  ,turnover_limpo$traffic  )
+CramerV( turnover_limpo$gender  ,turnover_limpo$coach  )
+CramerV( turnover_limpo$gender  ,turnover_limpo$head_gender  )
+CramerV( turnover_limpo$gender  ,turnover_limpo$greywage  )
+CramerV( turnover_limpo$gender  ,turnover_limpo$way  )
+
+#Industry
+
+CramerV( turnover_limpo$industry  ,turnover_limpo$gender  )
+CramerV( turnover_limpo$industry  ,turnover_limpo$industry  )
+CramerV( turnover_limpo$industry  ,turnover_limpo$profession  )
+CramerV( turnover_limpo$industry  ,turnover_limpo$traffic  )
+CramerV( turnover_limpo$industry  ,turnover_limpo$coach  )
+CramerV( turnover_limpo$industry  ,turnover_limpo$head_gender  )
+CramerV( turnover_limpo$industry  ,turnover_limpo$greywage  )
+CramerV( turnover_limpo$industry  ,turnover_limpo$way  )
+
+#Profession
+
+CramerV( turnover_limpo$profession  ,turnover_limpo$gender  )
+CramerV( turnover_limpo$profession  ,turnover_limpo$industry  )
+CramerV( turnover_limpo$profession  ,turnover_limpo$profession  )
+CramerV( turnover_limpo$profession  ,turnover_limpo$traffic  )
+CramerV( turnover_limpo$profession  ,turnover_limpo$coach  )
+CramerV( turnover_limpo$profession  ,turnover_limpo$head_gender  )
+CramerV( turnover_limpo$profession  ,turnover_limpo$greywage  )
+CramerV( turnover_limpo$profession  ,turnover_limpo$way  )
+
+#Traffic
+CramerV( turnover_limpo$traffic  ,turnover_limpo$gender  )
+CramerV( turnover_limpo$traffic  ,turnover_limpo$industry  )
+CramerV( turnover_limpo$traffic  ,turnover_limpo$profession  )
+CramerV( turnover_limpo$traffic  ,turnover_limpo$traffic  )
+CramerV( turnover_limpo$traffic  ,turnover_limpo$coach  )
+CramerV( turnover_limpo$traffic  ,turnover_limpo$head_gender  )
+CramerV( turnover_limpo$traffic  ,turnover_limpo$greywage  )
+CramerV( turnover_limpo$traffic  ,turnover_limpo$way  )
+
 
 #-----------------------------------------------------------------------------------------------#----
 #                          MODELOS COM DISTRIBUIÇÕES COMUNS                                     #
@@ -1488,6 +1536,7 @@ plot(rank(tempo), devw,
 #*** Verificação de Fator de Inflação da Variância (VIF) ***#
 
 car::vif(modelo_weibull_8va)
+
 
 
 #===============================Exponencial==========================================================
