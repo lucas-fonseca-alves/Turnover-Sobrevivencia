@@ -1167,6 +1167,50 @@ CramerV( turnover_limpo$traffic  ,turnover_limpo$head_gender  )
 CramerV( turnover_limpo$traffic  ,turnover_limpo$greywage  )
 CramerV( turnover_limpo$traffic  ,turnover_limpo$way  )
 
+#Coach
+CramerV( turnover_limpo$coach  ,turnover_limpo$gender  )
+CramerV( turnover_limpo$coach  ,turnover_limpo$industry  )
+CramerV( turnover_limpo$coach  ,turnover_limpo$profession  )
+CramerV( turnover_limpo$coach  ,turnover_limpo$traffic  )
+CramerV( turnover_limpo$coach  ,turnover_limpo$coach  )
+CramerV( turnover_limpo$coach  ,turnover_limpo$head_gender  )
+CramerV( turnover_limpo$coach  ,turnover_limpo$greywage  )
+CramerV( turnover_limpo$coach  ,turnover_limpo$way  )
+
+#Head_Gender
+
+CramerV( turnover_limpo$head_gender  ,turnover_limpo$gender  )
+CramerV( turnover_limpo$head_gender  ,turnover_limpo$industry  )
+CramerV( turnover_limpo$head_gender  ,turnover_limpo$profession  )
+CramerV( turnover_limpo$head_gender  ,turnover_limpo$traffic  )
+CramerV( turnover_limpo$head_gender  ,turnover_limpo$coach  )
+CramerV( turnover_limpo$head_gender  ,turnover_limpo$head_gender  )
+CramerV( turnover_limpo$head_gender  ,turnover_limpo$greywage  )
+CramerV( turnover_limpo$head_gender  ,turnover_limpo$way  )
+
+#Greywage
+
+CramerV( turnover_limpo$greywage  ,turnover_limpo$gender  )
+CramerV( turnover_limpo$greywage  ,turnover_limpo$industry  )
+CramerV( turnover_limpo$greywage  ,turnover_limpo$profession  )
+CramerV( turnover_limpo$greywage  ,turnover_limpo$traffic  )
+CramerV( turnover_limpo$greywage  ,turnover_limpo$coach  )
+CramerV( turnover_limpo$greywage  ,turnover_limpo$head_gender  )
+CramerV( turnover_limpo$greywage  ,turnover_limpo$greywage  )
+CramerV( turnover_limpo$greywage  ,turnover_limpo$way  )
+
+#way
+
+CramerV( turnover_limpo$way  ,turnover_limpo$gender  )
+CramerV( turnover_limpo$way  ,turnover_limpo$industry  )
+CramerV( turnover_limpo$way  ,turnover_limpo$profession  )
+CramerV( turnover_limpo$way  ,turnover_limpo$traffic  )
+CramerV( turnover_limpo$way  ,turnover_limpo$coach  )
+CramerV( turnover_limpo$way  ,turnover_limpo$head_gender  )
+CramerV( turnover_limpo$way  ,turnover_limpo$greywage  )
+CramerV( turnover_limpo$way  ,turnover_limpo$way  )
+
+
 
 #-----------------------------------------------------------------------------------------------#----
 #                          MODELOS COM DISTRIBUIÇÕES COMUNS                                     #
