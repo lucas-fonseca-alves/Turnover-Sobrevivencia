@@ -1061,18 +1061,64 @@ variaveis_numericas <- turnover %>%
   dplyr::select(where(is.numeric), -event)
 
 
-matriz_correlacao <-cor(variaveis_numericas, use = "complete.obs")
+matriz_correlacao <-cor(variaveis_numericas, method='spearman', use = "complete.obs")
 
 
 library(ggcorrplot)
+library(RColorBrewer)
+
+nomes <- c(
+  "age" = "Idade",
+  "anxiety" = "Ansiedade",
+  "extraversion" = "Extroversão",
+  "independ" = "Independência",
+  "selfcontrol" = "Autocontrole",
+  "novator" = "Inovação",
+  "stag" = "Tempo de Experiência"
+)
+
+colnames(corr) <- nomes[colnames(corr)]
+rownames(corr) <- nomes[rownames(corr)]
+
+grafico_matriz <- ggcorrplot(
+  corr,
+  method = "square",
+  type = "upper",
+  lab = TRUE,
+  lab_size = 3,
+  colors = rev(brewer.pal(11, "RdYlBu"))
+) +
+  labs(fill = "Valor") +
+  theme(
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.grid = element_blank()
+  )
+
+ggsave("CorrNumericas.png", 
+       plot = grafico_matriz, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
 
 ggcorrplot(matriz_correlacao, 
            method = "square",      # quadrados coloridos
            type = "upper",         # apenas parte superior
            lab = TRUE,             # exibir valores numéricos
            lab_size = 3,
-           colors = c("red", "white", "blue"),
-           title = "Matriz de Correlação")
+           colors = c("red", "white", "blue")) +
+  theme(
+    axis.text.x = element_text(size = 10),  # tamanho menor eixo X
+    axis.text.y = element_text(size = 10),  # tamanho menor eixo Y
+    axis.title.x = element_blank(), 
+    axis.title.y = element_blank(),
+    panel.grid = element_blank()
+  )
+
+
 
 #***------ Verificar se as variáveis categoricas são independentes-----***
 
