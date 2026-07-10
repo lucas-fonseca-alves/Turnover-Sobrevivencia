@@ -1606,10 +1606,6 @@ modelo_weibull_8va <- survreg(Surv(stag, event) ~
                                 data = turnover_limpo, dist = "weibull")
 summary(modelo_weibull_8va)
 
-
-
-
-
 #-----------------------------------------------------------------------------------------------#----
 # 13) Verifique a qualidade do ajuste do modelo final
 #-----------------------------------------------------------------------------------------------#----
@@ -1665,7 +1661,10 @@ dev.off()
 
 martingal <- turnover_limpo$event-ei
 
-par(mfrow=c(1,1))
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_weibull_8va_Martingal.png", width = 800, height = 600)
+
+
 plot(tempo, martingal,
      xlab = "log(tempo)",
      ylab = "Residuo Martingal",  
@@ -1679,10 +1678,16 @@ plot(rank(tempo), martingal,
      pch = turnover_limpo$event+1
 )
 
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
 #identify(rank(tempo), martingal)
 
 #deviance
 devw <- (martingal/abs(martingal))*(-2*(martingal+turnover_limpo$event*log(turnover_limpo$event-martingal)))^(1/2)
+
+# 1. Abre o arquivo ("liga a impressora")
+png(filename = "resultados/Analise_Residuos/Residuo_weibull_8va_Deviance.png", width = 800, height = 600)
+
 plot(tempo, devw,
      xlab = "log(tempo)",
      ylab = "Resíduos Deviance",
@@ -1692,6 +1697,9 @@ plot(rank(tempo), devw,
      xlab = "ranks das observações",
      ylab = "Resíduos Deviance",
      pch = turnover_limpo$event+1)
+
+# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
+dev.off()
 
 #identify(rank(tempo), devw)
 
@@ -3130,3 +3138,151 @@ plot(rank(tempo), devw,
 
 
 
+
+
+
+
+#---------------------------------------------------------------------------------------------#----
+#                       Criação das tabelas latex
+#---------------------------------------------------------------------------------------------#----
+
+library(gtsummary)
+
+tbl_regression(modelo_weibull_8va, 
+               exponentiate = TRUE,   # TRUE se quiser Hazard Ratios (interpretação exponencial)
+               label = list(           # nomes das variáveis para exibição
+                 age = "Idade",
+                 industry = "Indústria",
+                 profession = "Profissão",
+                 traffic = "Canal de Recrutamento",
+                 greywage = "Salário Cinza",
+                 way = "Transporte",
+                 selfcontrol = "Autocontrole",
+                 anxiety = "Ansiedade"
+               )) %>%
+  bold_labels() %>%
+  italicize_levels()
+
+library(gtsummary)
+library(dplyr)
+
+# Suponha que seu modelo seja 'modelo_weibull_8va'
+library(gtsummary)
+
+tbl_regression(modelo_weibull_8va,
+               exponentiate = FALSE,
+               label = list(
+                 age = "Idade",
+                 industry = "Indústria",
+                 profession = "Profissão",
+                 traffic = "Canal de Recrutamento",
+                 greywage = "Salário Cinza",
+                 way = "Transporte",
+                 selfcontrol = "Autocontrole",
+                 anxiety = "Ansiedade"
+               )) %>%
+  bold_labels() %>%
+  italicize_levels() %>%
+  modify_column_hide(columns = c("conf.low", "conf.high")) %>%
+  modify_column_unhide(columns = c("std.error", "statistic")) %>% 
+  modify_header(
+    estimate = "**Estimativa**",
+    std.error = "**Erro Padrão**",
+    statistic = "**Estatística Z**",
+    p.value = "**p-valor**"
+  )
+
+
+library(broom)
+library(kableExtra)
+
+# Extrai tabela de coeficientes (já com valores, erro padrão, z e p)
+tab_coef <- tidy(modelo_weibull_8va, conf.int = TRUE)   # adiciona IC 95%
+
+# Renomear colunas para português (opcional)
+colnames(tab_coef) <- c("Termo", "Estimativa", "Erro Padrão", "Estatística Z", 
+                        "p-valor", "IC 95% inferior", "IC 95% superior")
+
+# Criar tabela formatada
+kable(tab_coef, format = "latex", booktabs = TRUE, digits = 3,
+      caption = "Coeficientes do modelo Weibull") %>%
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  pack_rows("Indústria", 2, 16) %>%          # agrupa categorias (ajuste os índices)
+  pack_rows("Profissão", 17, 27) %>%
+  pack_rows("Canal de Recrutamento", 28, 34) %>%
+  footnote(general = "Categoria de referência omitida.")
+
+
+
+
+
+
+
+
+
+
+# Só os valores significativos
+
+library(broom)
+library(dplyr)
+
+# Extrai todos os coeficientes
+tab_coef <- tidy(modelo_weibull_8va, conf.int = FALSE)
+
+# Exibe apenas os termos com p-valor < 0.05 (ajuste o limiar se necessário)
+tab_signif <- tab_coef %>%
+  filter(p.value < 0.05) %>%
+  select(term, estimate, std.error, statistic, p.value) %>%
+  rename(
+    Termo = term,
+    Estimativa = estimate,
+    `Erro Padrão` = std.error,
+    `Estatística Z` = statistic,
+    `p-valor` = p.value
+  )
+
+
+# Exibe apenas os termos com p-valor < 0.05 (ajuste o limiar se necessário)
+tab_signif <- tab_coef %>%
+  filter(p.value < 0.05) %>%
+  select(term, estimate, std.error, statistic, p.value) %>%
+  rename(
+    Termo = term,
+    Estimativa = estimate,
+    `Erro Padrão` = std.error,
+    `Estatística Z` = statistic,
+    `p-valor` = p.value
+  )
+
+write.csv2(tab_signif, "tabela_significativos.csv", row.names = FALSE)
+
+tabela_completa <- tbl_regression(modelo_weibull_8va,
+               exponentiate = FALSE,
+               label = list(
+                 age = "Idade",
+                 industry = "Indústria",
+                 profession = "Profissão",
+                 traffic = "Canal de Recrutamento",
+                 greywage = "Salário Cinza",
+                 way = "Transporte",
+                 selfcontrol = "Autocontrole",
+                 anxiety = "Ansiedade"
+               )) %>%
+  bold_labels() %>%
+  italicize_levels() %>%
+  modify_column_hide(columns = c("conf.low", "conf.high")) %>%
+  modify_column_unhide(columns = c("std.error", "statistic")) %>% 
+  modify_header(
+    estimate = "**Estimativa**",
+    std.error = "**Erro Padrão**",
+    statistic = "**Estatística Z**",
+    p.value = "**p-valor**"
+  )
+
+
+# Obter o table_body e filtrar
+tabela_signif <- tabela_completa %>%
+  modify_table_body(
+    ~ .x %>%
+      filter(as.numeric(p.value) < 0.1)
+  )
