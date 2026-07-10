@@ -1104,19 +1104,19 @@ ggsave("CorrNumericas.png",
        dpi = 300,
        path = caminho_curvaSobrevivencia) 
 
-ggcorrplot(matriz_correlacao, 
-           method = "square",      # quadrados coloridos
-           type = "upper",         # apenas parte superior
-           lab = TRUE,             # exibir valores numéricos
-           lab_size = 3,
-           colors = c("red", "white", "blue")) +
-  theme(
-    axis.text.x = element_text(size = 10),  # tamanho menor eixo X
-    axis.text.y = element_text(size = 10),  # tamanho menor eixo Y
-    axis.title.x = element_blank(), 
-    axis.title.y = element_blank(),
-    panel.grid = element_blank()
-  )
+# ggcorrplot(matriz_correlacao, 
+#            method = "square",      # quadrados coloridos
+#            type = "upper",         # apenas parte superior
+#            lab = TRUE,             # exibir valores numéricos
+#            lab_size = 3,
+#            colors = c("red", "white", "blue")) +
+#   theme(
+#     axis.text.x = element_text(size = 10),  # tamanho menor eixo X
+#     axis.text.y = element_text(size = 10),  # tamanho menor eixo Y
+#     axis.title.x = element_blank(), 
+#     axis.title.y = element_blank(),
+#     panel.grid = element_blank()
+#   )
 
 
 
@@ -1211,6 +1211,79 @@ CramerV( turnover_limpo$way  ,turnover_limpo$greywage  )
 CramerV( turnover_limpo$way  ,turnover_limpo$way  )
 
 
+library(DescTools)
+library(tidyr)      # para pivot_wider
+
+# Lista das variáveis categóricas
+vars <- c("gender", "industry", "profession", "traffic", "coach", 
+          "head_gender", "greywage", "way")
+
+# Calcular V de Cramér para todos os pares (incluindo a própria variável)
+pares <- expand.grid(Var1 = vars, Var2 = vars, stringsAsFactors = FALSE)
+pares$CramerV <- mapply(function(x, y) {
+  if (x == y) 1 else CramerV(turnover_limpo[[x]], turnover_limpo[[y]])
+}, pares$Var1, pares$Var2)
+
+# Transformar em matriz
+matriz_V <- pares %>% pivot_wider(names_from = Var2, values_from = CramerV)
+matriz_V <- as.matrix(matriz_V[, -1])                # remover coluna de nomes
+rownames(matriz_V) <- colnames(matriz_V)
+matriz_V <- matriz_V[vars, vars]                     # garantir a ordem
+
+
+library(ggcorrplot)
+
+ggcorrplot(matriz_V, 
+           method = "square",      # quadrados coloridos
+           type = "upper",         # apenas triângulo superior
+           lab = TRUE,             # exibir valores numéricos
+           lab_size = 3,
+           colors = c("white", "steelblue", "darkblue"),
+           title = "V de Cramér entre variáveis categóricas",
+           legend.title = "V")
+
+nomes_categoricas <-  c(
+    "gender" = "Gênero",
+    "industry" = "Indústria",
+    "profession" = "Profissão",
+    "traffic" = "Canal de Recrutamento",
+    "coach" = "Mentoria",
+    "head_gender" = "Gênero Supervisor",
+    "greywage" = "Salário Cinza",
+    "way" = "Transporte"         
+  )
+  
+  
+# Renomear colunas e linhas da matriz de V de Cramér
+colnames(matriz_V) <- nomes_categoricas[colnames(matriz_V)]
+rownames(matriz_V) <- nomes_categoricas[rownames(matriz_V)]
+
+# Agora o gráfico exibirá os nomes em português
+grafico_cramerV <- ggcorrplot(matriz_V,
+           method = "square",
+           type = "upper",
+           lab = TRUE,
+           lab_size = 3,
+           colors = rev(brewer.pal(11, "RdYlBu")),
+           legend.title = "V") +
+  scale_fill_gradientn(colors = rev(brewer.pal(11, "RdYlBu")),
+                       limits = c(0, 1),
+                       breaks = seq(0, 1, 0.25),
+                       guide = guide_colorbar(title = "V Cramér"))+
+  theme(
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.grid = element_blank()
+  )
+
+ggsave("CramerVCategoricas.png", 
+       plot = grafico_cramerV, 
+       width = 8, 
+       height = 6, 
+       dpi = 300,
+       path = caminho_curvaSobrevivencia) 
 
 #-----------------------------------------------------------------------------------------------#----
 #                          MODELOS COM DISTRIBUIÇÕES COMUNS                                     #
