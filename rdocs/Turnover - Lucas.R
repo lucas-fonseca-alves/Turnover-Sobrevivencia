@@ -1077,11 +1077,11 @@ nomes <- c(
   "stag" = "Tempo de Experiência"
 )
 
-colnames(corr) <- nomes[colnames(corr)]
-rownames(corr) <- nomes[rownames(corr)]
+colnames(matriz_correlacao) <- nomes[colnames(matriz_correlacao)]
+rownames(matriz_correlacao) <- nomes[rownames(matriz_correlacao)]
 
 grafico_matriz <- ggcorrplot(
-  corr,
+  matriz_correlacao,
   method = "square",
   type = "upper",
   lab = TRUE,
