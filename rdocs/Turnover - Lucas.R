@@ -7,7 +7,6 @@ library(MASS)
 library(ggplot2)
 library(survminer)
 library(car)
-library(DescTools)
 
 
 turnover <- read_excel("banco/turnover.xlsx")
@@ -1061,229 +1060,19 @@ variaveis_numericas <- turnover %>%
   dplyr::select(where(is.numeric), -event)
 
 
-matriz_correlacao <-cor(variaveis_numericas, method='spearman', use = "complete.obs")
-
-
-library(ggcorrplot)
-library(RColorBrewer)
-
-nomes <- c(
-  "age" = "Idade",
-  "anxiety" = "Ansiedade",
-  "extraversion" = "Extroversão",
-  "independ" = "Independência",
-  "selfcontrol" = "Autocontrole",
-  "novator" = "Inovação",
-  "stag" = "Tempo de Experiência"
-)
-
-colnames(matriz_correlacao) <- nomes[colnames(matriz_correlacao)]
-rownames(matriz_correlacao) <- nomes[rownames(matriz_correlacao)]
-
-grafico_matriz <- ggcorrplot(
-  matriz_correlacao,
-  method = "square",
-  type = "upper",
-  lab = TRUE,
-  lab_size = 3,
-  colors = rev(brewer.pal(11, "RdYlBu"))
-) +
-  labs(fill = "Valor") +
-  theme(
-    axis.text.x = element_text(size = 10),
-    axis.text.y = element_text(size = 10),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank(),
-    panel.grid = element_blank()
-  )
-
-ggsave("CorrNumericas.png", 
-       plot = grafico_matriz, 
-       width = 8, 
-       height = 6, 
-       dpi = 300,
-       path = caminho_curvaSobrevivencia) 
-
-# ggcorrplot(matriz_correlacao, 
-#            method = "square",      # quadrados coloridos
-#            type = "upper",         # apenas parte superior
-#            lab = TRUE,             # exibir valores numéricos
-#            lab_size = 3,
-#            colors = c("red", "white", "blue")) +
-#   theme(
-#     axis.text.x = element_text(size = 10),  # tamanho menor eixo X
-#     axis.text.y = element_text(size = 10),  # tamanho menor eixo Y
-#     axis.title.x = element_blank(), 
-#     axis.title.y = element_blank(),
-#     panel.grid = element_blank()
-#   )
-
-
-
-#***------ Verificar se as variáveis categoricas são independentes-----***
-
-# H₀ (hipótese nula): As duas variáveis categóricas são independentes.
-# H₁ (hipótese alternativa): As duas variáveis categóricas não são independentes (existe associação entre elas).
-
-#Gender
-CramerV( turnover_limpo$gender  ,turnover_limpo$gender  )
-CramerV( turnover_limpo$gender  ,turnover_limpo$industry  )
-CramerV( turnover_limpo$gender  ,turnover_limpo$profession  )
-CramerV( turnover_limpo$gender  ,turnover_limpo$traffic  )
-CramerV( turnover_limpo$gender  ,turnover_limpo$coach  )
-CramerV( turnover_limpo$gender  ,turnover_limpo$head_gender  )
-CramerV( turnover_limpo$gender  ,turnover_limpo$greywage  )
-CramerV( turnover_limpo$gender  ,turnover_limpo$way  )
-
-#Industry
-
-CramerV( turnover_limpo$industry  ,turnover_limpo$gender  )
-CramerV( turnover_limpo$industry  ,turnover_limpo$industry  )
-CramerV( turnover_limpo$industry  ,turnover_limpo$profession  )
-CramerV( turnover_limpo$industry  ,turnover_limpo$traffic  )
-CramerV( turnover_limpo$industry  ,turnover_limpo$coach  )
-CramerV( turnover_limpo$industry  ,turnover_limpo$head_gender  )
-CramerV( turnover_limpo$industry  ,turnover_limpo$greywage  )
-CramerV( turnover_limpo$industry  ,turnover_limpo$way  )
-
-#Profession
-
-CramerV( turnover_limpo$profession  ,turnover_limpo$gender  )
-CramerV( turnover_limpo$profession  ,turnover_limpo$industry  )
-CramerV( turnover_limpo$profession  ,turnover_limpo$profession  )
-CramerV( turnover_limpo$profession  ,turnover_limpo$traffic  )
-CramerV( turnover_limpo$profession  ,turnover_limpo$coach  )
-CramerV( turnover_limpo$profession  ,turnover_limpo$head_gender  )
-CramerV( turnover_limpo$profession  ,turnover_limpo$greywage  )
-CramerV( turnover_limpo$profession  ,turnover_limpo$way  )
-
-#Traffic
-CramerV( turnover_limpo$traffic  ,turnover_limpo$gender  )
-CramerV( turnover_limpo$traffic  ,turnover_limpo$industry  )
-CramerV( turnover_limpo$traffic  ,turnover_limpo$profession  )
-CramerV( turnover_limpo$traffic  ,turnover_limpo$traffic  )
-CramerV( turnover_limpo$traffic  ,turnover_limpo$coach  )
-CramerV( turnover_limpo$traffic  ,turnover_limpo$head_gender  )
-CramerV( turnover_limpo$traffic  ,turnover_limpo$greywage  )
-CramerV( turnover_limpo$traffic  ,turnover_limpo$way  )
-
-#Coach
-CramerV( turnover_limpo$coach  ,turnover_limpo$gender  )
-CramerV( turnover_limpo$coach  ,turnover_limpo$industry  )
-CramerV( turnover_limpo$coach  ,turnover_limpo$profession  )
-CramerV( turnover_limpo$coach  ,turnover_limpo$traffic  )
-CramerV( turnover_limpo$coach  ,turnover_limpo$coach  )
-CramerV( turnover_limpo$coach  ,turnover_limpo$head_gender  )
-CramerV( turnover_limpo$coach  ,turnover_limpo$greywage  )
-CramerV( turnover_limpo$coach  ,turnover_limpo$way  )
-
-#Head_Gender
-
-CramerV( turnover_limpo$head_gender  ,turnover_limpo$gender  )
-CramerV( turnover_limpo$head_gender  ,turnover_limpo$industry  )
-CramerV( turnover_limpo$head_gender  ,turnover_limpo$profession  )
-CramerV( turnover_limpo$head_gender  ,turnover_limpo$traffic  )
-CramerV( turnover_limpo$head_gender  ,turnover_limpo$coach  )
-CramerV( turnover_limpo$head_gender  ,turnover_limpo$head_gender  )
-CramerV( turnover_limpo$head_gender  ,turnover_limpo$greywage  )
-CramerV( turnover_limpo$head_gender  ,turnover_limpo$way  )
-
-#Greywage
-
-CramerV( turnover_limpo$greywage  ,turnover_limpo$gender  )
-CramerV( turnover_limpo$greywage  ,turnover_limpo$industry  )
-CramerV( turnover_limpo$greywage  ,turnover_limpo$profession  )
-CramerV( turnover_limpo$greywage  ,turnover_limpo$traffic  )
-CramerV( turnover_limpo$greywage  ,turnover_limpo$coach  )
-CramerV( turnover_limpo$greywage  ,turnover_limpo$head_gender  )
-CramerV( turnover_limpo$greywage  ,turnover_limpo$greywage  )
-CramerV( turnover_limpo$greywage  ,turnover_limpo$way  )
-
-#way
-
-CramerV( turnover_limpo$way  ,turnover_limpo$gender  )
-CramerV( turnover_limpo$way  ,turnover_limpo$industry  )
-CramerV( turnover_limpo$way  ,turnover_limpo$profession  )
-CramerV( turnover_limpo$way  ,turnover_limpo$traffic  )
-CramerV( turnover_limpo$way  ,turnover_limpo$coach  )
-CramerV( turnover_limpo$way  ,turnover_limpo$head_gender  )
-CramerV( turnover_limpo$way  ,turnover_limpo$greywage  )
-CramerV( turnover_limpo$way  ,turnover_limpo$way  )
-
-
-library(DescTools)
-library(tidyr)      # para pivot_wider
-
-# Lista das variáveis categóricas
-vars <- c("gender", "industry", "profession", "traffic", "coach", 
-          "head_gender", "greywage", "way")
-
-# Calcular V de Cramér para todos os pares (incluindo a própria variável)
-pares <- expand.grid(Var1 = vars, Var2 = vars, stringsAsFactors = FALSE)
-pares$CramerV <- mapply(function(x, y) {
-  if (x == y) 1 else CramerV(turnover_limpo[[x]], turnover_limpo[[y]])
-}, pares$Var1, pares$Var2)
-
-# Transformar em matriz
-matriz_V <- pares %>% pivot_wider(names_from = Var2, values_from = CramerV)
-matriz_V <- as.matrix(matriz_V[, -1])                # remover coluna de nomes
-rownames(matriz_V) <- colnames(matriz_V)
-matriz_V <- matriz_V[vars, vars]                     # garantir a ordem
+matriz_correlacao <-cor(variaveis_numericas, use = "complete.obs")
 
 
 library(ggcorrplot)
 
-ggcorrplot(matriz_V, 
+ggcorrplot(matriz_correlacao, 
            method = "square",      # quadrados coloridos
-           type = "upper",         # apenas triângulo superior
+           type = "upper",         # apenas parte superior
            lab = TRUE,             # exibir valores numéricos
            lab_size = 3,
-           colors = c("white", "steelblue", "darkblue"),
-           title = "V de Cramér entre variáveis categóricas",
-           legend.title = "V")
+           colors = c("red", "white", "blue"),
+           title = "Matriz de Correlação")
 
-nomes_categoricas <-  c(
-    "gender" = "Gênero",
-    "industry" = "Indústria",
-    "profession" = "Profissão",
-    "traffic" = "Canal de Recrutamento",
-    "coach" = "Mentoria",
-    "head_gender" = "Gênero Supervisor",
-    "greywage" = "Salário Cinza",
-    "way" = "Transporte"         
-  )
-  
-  
-# Renomear colunas e linhas da matriz de V de Cramér
-colnames(matriz_V) <- nomes_categoricas[colnames(matriz_V)]
-rownames(matriz_V) <- nomes_categoricas[rownames(matriz_V)]
-
-# Agora o gráfico exibirá os nomes em português
-grafico_cramerV <- ggcorrplot(matriz_V,
-           method = "square",
-           type = "upper",
-           lab = TRUE,
-           lab_size = 3,
-           colors = rev(brewer.pal(11, "RdYlBu")),
-           legend.title = "V") +
-  scale_fill_gradientn(colors = rev(brewer.pal(11, "RdYlBu")),
-                       limits = c(0, 1),
-                       breaks = seq(0, 1, 0.25),
-                       guide = guide_colorbar(title = "V Cramér"))+
-  theme(
-    axis.text.x = element_text(size = 10),
-    axis.text.y = element_text(size = 10),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank(),
-    panel.grid = element_blank()
-  )
-
-ggsave("CramerVCategoricas.png", 
-       plot = grafico_cramerV, 
-       width = 8, 
-       height = 6, 
-       dpi = 300,
-       path = caminho_curvaSobrevivencia) 
 
 #-----------------------------------------------------------------------------------------------#----
 #                          MODELOS COM DISTRIBUIÇÕES COMUNS                                     #
@@ -1440,15 +1229,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_lognormal_8va_CoxSnell.png",
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -1606,6 +1399,10 @@ modelo_weibull_8va <- survreg(Surv(stag, event) ~
                                 data = turnover_limpo, dist = "weibull")
 summary(modelo_weibull_8va)
 
+
+
+
+
 #-----------------------------------------------------------------------------------------------#----
 # 13) Verifique a qualidade do ajuste do modelo final
 #-----------------------------------------------------------------------------------------------#----
@@ -1642,15 +1439,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_weibull_8va_CoxSnell.png", w
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -1661,10 +1462,7 @@ dev.off()
 
 martingal <- turnover_limpo$event-ei
 
-# 1. Abre o arquivo ("liga a impressora")
-png(filename = "resultados/Analise_Residuos/Residuo_weibull_8va_Martingal.png", width = 800, height = 600)
-
-
+par(mfrow=c(1,1))
 plot(tempo, martingal,
      xlab = "log(tempo)",
      ylab = "Residuo Martingal",  
@@ -1678,16 +1476,10 @@ plot(rank(tempo), martingal,
      pch = turnover_limpo$event+1
 )
 
-# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
-dev.off()
 #identify(rank(tempo), martingal)
 
 #deviance
 devw <- (martingal/abs(martingal))*(-2*(martingal+turnover_limpo$event*log(turnover_limpo$event-martingal)))^(1/2)
-
-# 1. Abre o arquivo ("liga a impressora")
-png(filename = "resultados/Analise_Residuos/Residuo_weibull_8va_Deviance.png", width = 800, height = 600)
-
 plot(tempo, devw,
      xlab = "log(tempo)",
      ylab = "Resíduos Deviance",
@@ -1698,16 +1490,12 @@ plot(rank(tempo), devw,
      ylab = "Resíduos Deviance",
      pch = turnover_limpo$event+1)
 
-# 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
-dev.off()
-
 #identify(rank(tempo), devw)
 
 
 #*** Verificação de Fator de Inflação da Variância (VIF) ***#
 
 car::vif(modelo_weibull_8va)
-
 
 
 #===============================Exponencial==========================================================
@@ -1858,15 +1646,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_exponential_7va_CoxSnell.png
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -2066,15 +1858,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_loglogistic_7va_CoxSnell.png
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -2353,15 +2149,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_extremePadrao_8va_CoxSnell.p
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -2563,15 +2363,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_extreme_8va_CoxSnell.png", w
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -2770,15 +2574,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_gaussian_8va_CoxSnell.png", 
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -2997,15 +2805,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_logistic_7va_CoxSnell.png", 
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -3084,15 +2896,19 @@ png(filename = "resultados/Analise_Residuos/Residuo_logistic_8va_CoxSnell.png", 
 # 2. Gera o gráfico (ele não vai aparecer na tela do R, vai direto para o arquivo)
 plot(KMew, conf.int = F, 
      xlab = "Resíduos de Cox-Snell",
-     ylab = 'Sobrevivência Estimada')
-lines(te, sexp, lty=2, col=2)
+     ylab = 'Sobrevivência Estimada',
+     lwd = 2.5,
+     cex.axis = 1.5,
+     cex.lab = 1.5,)
+lines(te, sexp, lty=2, col=2,lwd = 3)
 legend(
   'topright',
   1.0,
   lty = c(1,2),
   col = c(1,2),
+  lwd = 2,
   c("Kaplan-Meier", "Exponencial Padrão"),
-  cex=0.8,
+  cex=2,
   bty = "n"
 )
 # 3. Salva e fecha o arquivo ("ejeta o papel") - ISSO É O MAIS IMPORTANTE!
@@ -3138,151 +2954,3 @@ plot(rank(tempo), devw,
 
 
 
-
-
-
-
-#---------------------------------------------------------------------------------------------#----
-#                       Criação das tabelas latex
-#---------------------------------------------------------------------------------------------#----
-
-library(gtsummary)
-
-tbl_regression(modelo_weibull_8va, 
-               exponentiate = TRUE,   # TRUE se quiser Hazard Ratios (interpretação exponencial)
-               label = list(           # nomes das variáveis para exibição
-                 age = "Idade",
-                 industry = "Indústria",
-                 profession = "Profissão",
-                 traffic = "Canal de Recrutamento",
-                 greywage = "Salário Cinza",
-                 way = "Transporte",
-                 selfcontrol = "Autocontrole",
-                 anxiety = "Ansiedade"
-               )) %>%
-  bold_labels() %>%
-  italicize_levels()
-
-library(gtsummary)
-library(dplyr)
-
-# Suponha que seu modelo seja 'modelo_weibull_8va'
-library(gtsummary)
-
-tbl_regression(modelo_weibull_8va,
-               exponentiate = FALSE,
-               label = list(
-                 age = "Idade",
-                 industry = "Indústria",
-                 profession = "Profissão",
-                 traffic = "Canal de Recrutamento",
-                 greywage = "Salário Cinza",
-                 way = "Transporte",
-                 selfcontrol = "Autocontrole",
-                 anxiety = "Ansiedade"
-               )) %>%
-  bold_labels() %>%
-  italicize_levels() %>%
-  modify_column_hide(columns = c("conf.low", "conf.high")) %>%
-  modify_column_unhide(columns = c("std.error", "statistic")) %>% 
-  modify_header(
-    estimate = "**Estimativa**",
-    std.error = "**Erro Padrão**",
-    statistic = "**Estatística Z**",
-    p.value = "**p-valor**"
-  )
-
-
-library(broom)
-library(kableExtra)
-
-# Extrai tabela de coeficientes (já com valores, erro padrão, z e p)
-tab_coef <- tidy(modelo_weibull_8va, conf.int = TRUE)   # adiciona IC 95%
-
-# Renomear colunas para português (opcional)
-colnames(tab_coef) <- c("Termo", "Estimativa", "Erro Padrão", "Estatística Z", 
-                        "p-valor", "IC 95% inferior", "IC 95% superior")
-
-# Criar tabela formatada
-kable(tab_coef, format = "latex", booktabs = TRUE, digits = 3,
-      caption = "Coeficientes do modelo Weibull") %>%
-  kable_styling(latex_options = c("striped", "hold_position")) %>%
-  pack_rows("Indústria", 2, 16) %>%          # agrupa categorias (ajuste os índices)
-  pack_rows("Profissão", 17, 27) %>%
-  pack_rows("Canal de Recrutamento", 28, 34) %>%
-  footnote(general = "Categoria de referência omitida.")
-
-
-
-
-
-
-
-
-
-
-# Só os valores significativos
-
-library(broom)
-library(dplyr)
-
-# Extrai todos os coeficientes
-tab_coef <- tidy(modelo_weibull_8va, conf.int = FALSE)
-
-# Exibe apenas os termos com p-valor < 0.05 (ajuste o limiar se necessário)
-tab_signif <- tab_coef %>%
-  filter(p.value < 0.05) %>%
-  select(term, estimate, std.error, statistic, p.value) %>%
-  rename(
-    Termo = term,
-    Estimativa = estimate,
-    `Erro Padrão` = std.error,
-    `Estatística Z` = statistic,
-    `p-valor` = p.value
-  )
-
-
-# Exibe apenas os termos com p-valor < 0.05 (ajuste o limiar se necessário)
-tab_signif <- tab_coef %>%
-  filter(p.value < 0.05) %>%
-  select(term, estimate, std.error, statistic, p.value) %>%
-  rename(
-    Termo = term,
-    Estimativa = estimate,
-    `Erro Padrão` = std.error,
-    `Estatística Z` = statistic,
-    `p-valor` = p.value
-  )
-
-write.csv2(tab_signif, "tabela_significativos.csv", row.names = FALSE)
-
-tabela_completa <- tbl_regression(modelo_weibull_8va,
-               exponentiate = FALSE,
-               label = list(
-                 age = "Idade",
-                 industry = "Indústria",
-                 profession = "Profissão",
-                 traffic = "Canal de Recrutamento",
-                 greywage = "Salário Cinza",
-                 way = "Transporte",
-                 selfcontrol = "Autocontrole",
-                 anxiety = "Ansiedade"
-               )) %>%
-  bold_labels() %>%
-  italicize_levels() %>%
-  modify_column_hide(columns = c("conf.low", "conf.high")) %>%
-  modify_column_unhide(columns = c("std.error", "statistic")) %>% 
-  modify_header(
-    estimate = "**Estimativa**",
-    std.error = "**Erro Padrão**",
-    statistic = "**Estatística Z**",
-    p.value = "**p-valor**"
-  )
-
-
-# Obter o table_body e filtrar
-tabela_signif <- tabela_completa %>%
-  modify_table_body(
-    ~ .x %>%
-      filter(as.numeric(p.value) < 0.1)
-  )
